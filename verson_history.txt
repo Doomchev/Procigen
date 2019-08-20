@@ -1,0 +1,44 @@
+	+ Palette editor.
+2019.08.20 (version 0.5)
+	+ Rendering to image files.
+	+ Versioning and loading projects of previous versions.
+	+ Project duration
+	+ Menu item for removing selected element from container.
+	+ GetList method for every container.
+	* Chained alterations are now distinct from others
+2019.08.17 (version 0.4)
+  + Serialization
+  + Backup system
+  + Menu items for adding elements after selected, move them up and down
+  + Menu items for loading and saving project
+  + String an list value properties
+  + Methods for read/write positive integers and strings
+	+ Swirl, LoopSector, MoveToVector transformations.
+  * Restructurization of packages
+	* Fixed beam pattern
+2019.08.15 (version 0.3)
+  + Multi-threaded rendering
+  + Linear and Sine alterations
+  + Radial transformation
+  * Fixed GUI
+2019.08.10 (version 0.2)
+  + Enumerated, element and new element properties selection
+  + Scale bar to edit numeric values
+  + Repainting chosen GUI elements
+  + Maximum, minimum and step values of parameter template
+  + Showing inner properties of element's properties
+2019.08.09 (version 0.1)
+  + Project elements column, properties column
+  + GUI element blocks
+  + GUI property blocks
+  + Single composition and Composition array
+  + Beam and Gradient patterns
+  + Add, multiply, min and max operations
+  + Palettes
+  + Bitmaps
+  + Affine transformation
+  + Double value, enumerated value, element value properties
+  + Increment and Multiply modifiers
+  + Right click menus for Project and Bitmap
+  + Nested menu item
+  + Menu item for adding new element from collection to another element's list
