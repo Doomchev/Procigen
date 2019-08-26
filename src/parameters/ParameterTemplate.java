@@ -90,8 +90,8 @@ public class ParameterTemplate extends Serialization {
 
   public double limit(double value) {
     if(step != 0.0) value = Math.round(value * step) / step;
-    if(max != min && value < min) value = min;
     if(max > min && value > max) value = max;
+    if(max != min && value < min) value = min;
     return value;
   }
 

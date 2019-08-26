@@ -4,6 +4,7 @@ import base.Main;
 import java.awt.Color;
 import java.awt.Graphics;
 import structure.Element;
+import structure.Palette;
 
 public class ElementBlock extends GUIElement {
   public Element element, parent;
@@ -27,9 +28,15 @@ public class ElementBlock extends GUIElement {
   }
 
   public void onclick(int x0, int y0) {
-    selectedProperty = null;
+    Palette palette = element.getPalette();
     selectedElement = element;
-    updateProperties();
+    if(palette != null) {
+      selectedPalette = palette;
+      scalePanel.repaint();
+    } else {
+      selectedProperty = null;
+      updateProperties();
+    }
     elementsPanel.repaint();
   }
 

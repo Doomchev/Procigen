@@ -17,7 +17,7 @@ public class Version extends Serialization {
     this.numbers = numbers;
   }
   
-  public boolean lesssThan(Version version) {
+  public boolean lessThan(Version version) {
     int[] numbers2 = version.numbers;
     int size = numbers2.length;
     for(int index = 0; index < numbers.length; index++) {
@@ -26,11 +26,21 @@ public class Version extends Serialization {
       if(difference > 0) return false;
       if(difference < 0) return true;
     }
-    return false;
+    return numbers.length < size;
   }
 
   void write() throws IOException {
     writeInt(numbers.length);
     for(int index = 0; index < numbers.length; index++) writeInt(numbers[index]);
+  }
+
+  @Override
+  public String toString() {
+    String str = "";
+    for(int index = 0; index < numbers.length; index++) {
+      if(!str.isEmpty()) str += ".";
+      str += numbers[index];
+    }
+    return str;
   }
 }

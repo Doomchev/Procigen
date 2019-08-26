@@ -1,9 +1,11 @@
 package gui;
 
+import base.Main;
 import parameters.ParameterTemplate;
 import gui.menu.AlterationMenuItem;
 import javax.swing.JPopupMenu;
 import structure.Element;
+import structure.Palette;
 
 public class PropertyBlock extends ElementBlock {
   public ParameterTemplate template;
@@ -30,10 +32,17 @@ public class PropertyBlock extends ElementBlock {
   
   @Override
   public void onclick(int x0, int y0) {
-    if(template.type != ParameterTemplate.DOUBLE) return;
-    selectedProperty = this;
-    scalePos = element.params[parameterIndex].getDouble();
-    propertiesPanel.repaint();
+    Element param = element.params[parameterIndex];
+    Palette palette = param.getPalette();
+    if(palette != null) { 
+      selectedPalette = palette;
+    } else {
+      if(template.type != ParameterTemplate.DOUBLE) return;
+      Main.selectedPalette = null;
+      selectedProperty = this;
+      scalePos = param.getDouble();
+      propertiesPanel.repaint();
+    }
     scalePanel.repaint();
   }
 

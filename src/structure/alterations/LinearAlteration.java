@@ -3,10 +3,10 @@ package structure.alterations;
 import parameters.ParameterTemplate;
 
 public class LinearAlteration extends Alteration {
-  public static  final int N_PART = 2;
+  public static  final int N_PART = 3;
 
   static {
-    ParameterTemplate[] templates = new ParameterTemplate[3];
+    ParameterTemplate[] templates = new ParameterTemplate[4];
     initTemplates(templates);
     parameterTemplates.put(LinearAlteration.class, templates);
   }
@@ -23,7 +23,9 @@ public class LinearAlteration extends Alteration {
 
   public double getK() {
     double part = params[N_PART].getDouble();
-    return part * nValue / quantityValue + timeValue * (1.0 - part);
+    double k = part * nValue / quantityValue + timeValue * (1.0 - part)
+        + params[SHIFT].getDouble();
+    return k - Math.floor(k);
   }
 
   @Override

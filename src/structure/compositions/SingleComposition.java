@@ -5,11 +5,11 @@ import structure.Element;
 import structure.transformations.Affine;
 
 public class SingleComposition extends Composition {
-  public static final int X = 2, Y = 3, SCALE = 4, ANGLE = 5, MULTIPLICATION = 6
-      , PATTERN = 7, OPERATION = 8;
+  public static final int X = 2, Y = 3, SCALE = 4, ANGLE = 5, INCREMENT = 6
+      , MULTIPLICATION = 7, PATTERN = 8, OPERATION = 9;
   
   static {
-    ParameterTemplate[] templates = new ParameterTemplate[9];
+    ParameterTemplate[] templates = new ParameterTemplate[10];
     setTemplates(templates, "Composition");
     parameterTemplates.put(SingleComposition.class, templates);
   }
@@ -19,7 +19,8 @@ public class SingleComposition extends Composition {
     templates[X] = new ParameterTemplate("X", 0.0);
     templates[Y] = new ParameterTemplate("Y", 0.0);
     templates[SCALE] = new ParameterTemplate("Scale", 1.0);
-    templates[ANGLE] = new ParameterTemplate("Angle", 0.0, 0.0, 1.0);
+    templates[ANGLE] = new ParameterTemplate("Angle", 0.0);
+    templates[INCREMENT] = new ParameterTemplate("Increment", 0.0, 0.0, 1.0);
     templates[MULTIPLICATION] = new ParameterTemplate("Multiplication", 0.5);
     templates[PATTERN] = new ParameterTemplate("Pattern", patternTypes, true);
     templates[OPERATION] = new ParameterTemplate("Operation", operations);

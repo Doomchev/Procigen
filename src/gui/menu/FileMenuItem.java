@@ -1,5 +1,6 @@
 package gui.menu;
 
+import base.Main;
 import base.Serialization;
 import java.awt.event.ActionEvent;
 import java.io.BufferedInputStream;
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
 import javax.swing.JFileChooser;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 import javax.swing.filechooser.FileFilter;
+import structure.Project;
 
 public class FileMenuItem extends MenuItem {
   public static final SimpleDateFormat sdf
@@ -47,7 +49,7 @@ public class FileMenuItem extends MenuItem {
     switch(operation) {
       case OPEN:
         if(chooser.showDialog(null, "Select file to open") == APPROVE_OPTION)
-          Serialization.load(chooser.getSelectedFile());
+          Serialization.load(chooser.getSelectedFile(), true);
         break;
       case SAVE_AS:
         if(chooser.showDialog(null, "Select file to save as") == APPROVE_OPTION) {
@@ -55,7 +57,7 @@ public class FileMenuItem extends MenuItem {
           if(!fileName.endsWith(".pgi")) fileName += ".pgi";
           File file = new File(fileName);
           if(file.exists()) backupFile(file);
-          Serialization.save(file);
+          Serialization.save(file, Project.instance);
         }
         break;
     }

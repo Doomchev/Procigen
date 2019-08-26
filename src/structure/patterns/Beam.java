@@ -27,7 +27,7 @@ public class Beam extends Gradient {
         x = (x + shift) * 0.5;
         x = (x - Math.floor(x)) * 2.0 - 1.0;
       }
-      x = Math.max(0, one - abs(x));
+      x = Math.max(0, one - abs(x)) * cMultiplication + cIncrement;
       switch(operation) {
         case ADD:
           pixels[index] += x;

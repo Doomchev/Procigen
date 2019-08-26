@@ -17,27 +17,31 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import structure.Element;
+import structure.Options;
+import structure.Palette;
+import structure.Palette.Col;
 import structure.Project;
 
 public class Main {
-  public static final Version currentVersion = new Version(0, 6);
+  public static final Version currentVersion = new Version(0, 7);
   public static final double PI2 = Math.PI * 2.0;
   public static final int elementsColumnWidth = 200, propertiesColumnWidth = 200
-      , scaleBarHeight = 60, blockHeight = 20, blockIndent = 5;
+      , scaleBarHeight = 60, blockHeight = 20, blockIndent = 5, colorWidth = 32;
   public static final int ELEMENTS = 1, RENDER = 2, PROPERTIES = 4, SCALE_BAR = 8;
   
   public static final int threadsQuantity
@@ -47,16 +51,14 @@ public class Main {
   public static int detalization = 4, renderWidth, renderHeight, scaleBarWidth
       , mouseStartingPos, nValue, quantityValue, imageWidth, imageHeight;
   public static double scaleScale = 50.0, scalePos = 0.0, scaleStartingPos
-      , markStep, timeValue;
+      , markStep, timeValue, cMultiplication, cIncrement;
   public static long startingTime = System.currentTimeMillis();
   
-  public static Project project;
   public static Column elementsColumn = new Column(), propertiesColumn = new Column();
   
   public static final LinkedList<Element> compositionTypes = new LinkedList<>();
   public static final LinkedList<Element> transformationTypes =new LinkedList<>();
   public static final LinkedList<Element> patternTypes = new LinkedList<>();
-  public static final LinkedList<Element> palettes = new LinkedList<>();
   public static final LinkedList<Element> alterations = new LinkedList<>();
   public static final HashMap<Class, ParameterTemplate[]> parameterTemplates
       = new HashMap<>();
@@ -69,6 +71,7 @@ public class Main {
   public static FontMetrics fm;
   public static Element selectedElement = null;
   public static PropertyBlock selectedProperty = null;
+  public static Palette selectedPalette = null;
   public static JPanel elementsPanel, renderPanel, propertiesPanel, scalePanel;
   public static JPopupMenu currentMenu;
   public static JFrame frame;
@@ -84,19 +87,20 @@ public class Main {
     return values;
   }
                 
-  public static void renderToImages(int width, int height) {
+  public static void renderToImages(int width, int height, boolean video) {
     stopRender();
     imageWidth = width;
     imageHeight = height;
-    project.init();
+    Project.instance.init();
     BufferedImage image = new BufferedImage(width, height
         , BufferedImage.TYPE_INT_ARGB);
     
     java.awt.EventQueue.invokeLater(() -> {
-      int quantity = (int) Math.ceil(30.0 * project.params[Project.DURATION]
-          .getDouble());
+      int quantity = (int) Math.ceil(30.0
+          * Project.instance.params[Project.DURATION].getDouble());
+      long start = System.currentTimeMillis();
+      frame.setTitle("Starting...");
       for(int num = 0; num < quantity; num ++) {
-        frame.setTitle(num + " / " + quantity);
         timeValue = 1.0 * num / quantity;
         try {
           latch = new CountDownLatch(threadsQuantity);
@@ -121,13 +125,18 @@ public class Main {
                 + ".png"));
           } catch (IOException ex) {
           }
+          int secs = (int) (1.0 * (System.currentTimeMillis() - start) / 1000.0
+              * (quantity - num) / num);
+          frame.setTitle(Math.floorDiv(secs, 60) + "m " + (secs % 60) + "s" );
         } catch (InterruptedException ex) {
           return;
         }
+        if(!video) break;
       }
+      frame.setTitle("Procigen");
       imageWidth = (int) Math.ceil(renderWidth / detalization);
       imageHeight = (int) Math.ceil(renderHeight / detalization);
-      project.init();
+      Project.instance.init();
       startRender();
     });
   }
@@ -140,7 +149,7 @@ public class Main {
       public void run() {
         while(true) {
           timeValue = 0.001 * (System.currentTimeMillis() - startingTime)
-              / project.params[Project.DURATION].getDouble();
+              / Project.instance.params[Project.DURATION].getDouble();
           timeValue = timeValue - Math.floor(timeValue);
           
           try {
@@ -175,12 +184,20 @@ public class Main {
   public static void main(String[] args) {
     java.awt.EventQueue.invokeLater(() -> {
       frame = new JFrame();
+      frame.addWindowListener(new WindowAdapter(){
+          @Override
+          public void windowClosing(WindowEvent e){
+            Serialization.save(new File("configuration.bin"), Options.instance);
+          }
+      });
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //frame.setSize(new Dimension(800, 400));
       frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
       
       Container pane = frame.getContentPane();
       pane.setBackground(Color.WHITE);
       pane.setLayout(null);
+      frame.setTitle("Procigen");
       frame.setVisible(true);
       
       Dimension windowSize = frame.getSize();
@@ -237,7 +254,26 @@ public class Main {
         public void paint(Graphics g) {
           g.setColor(Color.WHITE);
           g.fillRect(0, 0, scaleBarWidth, scaleBarHeight);
-          if(selectedProperty != null) {
+          if(selectedPalette != null) {
+            int x = 0;
+            Col[] colors = selectedPalette.colors;
+            for(int index = 0; index < colors.length; index++) {
+              Col color0 = colors[index];
+              int size = color0.size * colorWidth;
+              g.setColor(color0.get());
+              g.fillRect(x, 0, size, scaleBarHeight);
+              Col color1 = colors[(index + 1) % colors.length];
+              for(int xx = 0; xx < size; xx++) {
+                double k1 = 1.0 * xx / size;
+                double k0 = 1.0 - k1;
+                g.setColor(new Color((int) (color0.r * k0 + color1.r * k1)
+                    , (int) (color0.g * k0 + color1.g * k1)
+                    , (int) (color0.b * k0 + color1.b * k1)));
+                g.fillRect(x + xx, 0, 1, scaleBarHeight / 2);
+              }
+              x += size + 1;
+            }
+          } else if(selectedProperty != null) {
             if(scaleScale == 0.0) return;
             g.setColor(new Color(128, 255, 128));
             g.fillRect(scaleBarWidth / 2 - 1, 20, 3, 26);
@@ -320,8 +356,53 @@ public class Main {
         }
         @Override
         public void mousePressed(MouseEvent e) {
-          if(selectedProperty != null && mouseInsideScaleBar(e))
-            mouseStartingPos = e.getX();
+          if(mouseInsideScaleBar(e)) {
+            if(selectedPalette != null) {
+              stopRender();
+              if(e.getButton() == MouseEvent.BUTTON1) {
+                Col col = selectedColor(e.getX());
+                if(col == null) return;
+                Color color = JColorChooser.showDialog(frame, "Choose a color"
+                    , col.get());
+                if(color == null) return;
+                col.r = color.getRed();
+                col.g = color.getGreen();
+                col.b = color.getBlue();
+                scalePanel.repaint();
+              } else {
+                Col[] colors = selectedPalette.colors;
+                int length = colors.length;
+                int index = selectedColorIndex(e.getX());
+                Col[] newColors;
+                if(e.isControlDown()) {
+                  newColors = new Col[length - 1];
+                  if(index < 0) return;
+                  if(index > 0) System.arraycopy(colors, 0, newColors, 0, index);
+                  if(index < length - 1) System.arraycopy(colors, index + 1
+                      , newColors, index, length - index - 1);
+                } else {
+                  newColors = new Col[length + 1];
+                  Col newColor = new Col(255, 255, 255);
+                  if(index < 0) {
+                    System.arraycopy(colors, 0, newColors, 0, length);
+                    newColors[length] = newColor;
+                  } else {
+                    if(index > 0) System.arraycopy(colors, 0, newColors, 0, index);
+                    System.arraycopy(colors, index, newColors, index + 1, length
+                        - index);
+                    newColors[index] = newColor;
+                  }
+                }
+                selectedPalette.colors = newColors;
+                selectedPalette.init();
+                scalePanel.repaint();
+                startRender();
+              }
+                  
+            } else if(selectedProperty != null) {
+              mouseStartingPos = e.getX();
+            }
+          }
         }
         @Override
         public void mouseReleased(MouseEvent e) {
@@ -337,7 +418,18 @@ public class Main {
       });
       scalePanel.addMouseWheelListener((MouseWheelEvent e) -> {
         if(mouseInsideScaleBar(e)) {
-          if (e.getWheelRotation() < 0) {
+          if(selectedPalette != null) {
+            Col color = selectedColor(e.getX());
+            if(color == null) return;
+            if (e.getWheelRotation() > 0) {
+              if(color.size > 1) color.size--;
+            } else {
+              color.size++;
+            }
+            stopRender();
+            selectedPalette.init();
+            startRender();
+          } else if (e.getWheelRotation() < 0) {
             if(scaleScale < 100000) scaleScale *= 3;
           } else {
             if(scaleScale > 0.1) scaleScale /= 3;
@@ -372,6 +464,20 @@ public class Main {
       updateProject();
       startRender();
     });
+  }
+  
+  public static Col selectedColor(int x) {
+    int index = selectedColorIndex(x);
+    return index < 0 ? null : selectedPalette.colors[index];
+  }
+  
+  public static int selectedColorIndex(int x) {
+    Col[] colors = selectedPalette.colors;
+    for(int index = 0; index < colors.length; index++) {
+      x -= colors[index].size * colorWidth + 1;
+      if(x < 0) return index;
+    }
+    return -1;
   }
   
   public static boolean mouseInsideScaleBar(MouseEvent e) {
@@ -427,7 +533,8 @@ public class Main {
   
   public static void updateProject() {
     elementsColumn.clear();
-    elementsColumn.addList(project, 0, 0);
+    int y = elementsColumn.addList(Project.instance, 0, 0);
+    elementsColumn.addList(Options.instance, 0, y);
     elementsPanel.repaint();
   }
   

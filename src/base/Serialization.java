@@ -13,7 +13,13 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import parameters.ParameterTemplate;
 import structure.Element;
+import structure.Options;
 import structure.Project;
+import structure.alterations.ChainedLinearAlteration;
+import structure.alterations.ChainedSineAlteration;
+import structure.alterations.LinearAlteration;
+import structure.alterations.SineAlteration;
+import structure.compositions.CompositionArray;
 
 public class Serialization extends Main {
   private static final int DOUBLE = -1, ELEMENT = -2, ENUM = -3, LIST = -4
@@ -40,7 +46,9 @@ public class Serialization extends Main {
     for(int index = 0; index < map.length; index++) map[index] = -1;
     for(int index = 0; index < quantity; index++) {
       int mapIndex = params[index];
-      if(mapIndex >= 0) {
+      if(mapIndex >= newTemplates.length) {
+        System.err.println(elementClass.getSimpleName() + " < " + mapIndex);
+      } else if(mapIndex >= 0) {
         templates[index] = newTemplates[mapIndex];
         map[mapIndex] = index;
       } else {
@@ -51,18 +59,27 @@ public class Serialization extends Main {
     oldTemplates.put(elementClass, templates);
   }
       
-  public static void load(File file) {
+  public static void load(File file, boolean isProject) {
     /*ParameterTemplate[] newTemplates = Main.parameterTemplates.get(Project.class);
     ParameterTemplate[] templates = new ParameterTemplate[2];
     templates[0] = newTemplates[0];
     templates[1] = newTemplates[1];
     oldTemplates.put(Project.class, templates);*/
     
-    stopRender();
     try {
       reader = new DataInputStream(new FileInputStream(file));
       
       Version fileVersion = Version.read();
+      
+      if(fileVersion.lessThan(new Version(0, 6, 2))) {
+        fill(CompositionArray.class, 11, 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, DOUBLE);
+      }
+      if(fileVersion.lessThan(new Version(0, 6, 3))) {
+        fill(LinearAlteration.class, 3, 0, 1, 3);
+        fill(SineAlteration.class, 3, 0, 1, 3);
+        fill(ChainedLinearAlteration.class, 2, 0, 1);
+        fill(ChainedSineAlteration.class, 3, 0, 1, 3);
+      }
       
       elementsQuantity = readInt();
       allElements = new Element[elementsQuantity];
@@ -75,20 +92,26 @@ public class Serialization extends Main {
           allElements[elementIndex] = (Element) elementClass.newInstance();
           elementIndex++;
         }
-        if(elementClass == Project.class)
-          project = (Project) allElements[elementIndex - 1];
+        if(isProject) {
+          if(elementClass == Project.class)
+            Project.instance = (Project) allElements[elementIndex - 1];
+        } else if(elementClass == Options.class) {
+          Options.instance = (Options) allElements[elementIndex - 1];
+        }
       }
       for(int index = 0; index < elementsQuantity; index++) {
         Element element = allElements[index];
         element.read();
         ParameterTemplate[] templates = oldTemplates.get(element.getClass());
         if(templates != null) {
+          ParameterTemplate[] newTemplates = parameterTemplates.get(
+              element.getClass());
           int[] map = templateMapping.get(element.getClass());
-          Element[] params = new Element[templates.length];
-          for(int paramIndex = 0; paramIndex < templates.length; paramIndex++) {
+          Element[] params = new Element[newTemplates.length];
+          for(int paramIndex = 0; paramIndex < newTemplates.length; paramIndex++) {
             int mapIndex = map[paramIndex];
             if(mapIndex < 0) {
-              params[paramIndex] = templates[paramIndex].createParameter();
+              params[paramIndex] = newTemplates[paramIndex].createParameter();
             } else {
               params[paramIndex] = element.params[mapIndex];
             }
@@ -97,35 +120,33 @@ public class Serialization extends Main {
         }
       }
       
+      oldTemplates.clear();
       reader.close();
-      project.init();
       
-      /*Element[] params = project.params;
-      project.params = new Element[3];
-      project.params[0] = params[0];
-      project.params[1] = params[1];
-      project.params[2] = new DoubleValue(5.0);
-      oldTemplates = null;*/
+      if(isProject) {
+        stopRender();
+        Project.instance.init();
+        updateProject();
+        selectedElement = null;
+        updateProperties();
+        startRender();
+      }
       
-      updateProject();
-      selectedElement = null;
-      updateProperties();
     } catch (FileNotFoundException ex) {
       System.out.println(ex.toString());
     } catch (IOException | ClassNotFoundException | InstantiationException
         | IllegalAccessException ex) {
       System.out.println(ex.toString());
     }
-    startRender();
   }
   
-  public static void save(File file) {
+  public static void save(File file, Element parent) {
     try {
       writer = new DataOutputStream(new FileOutputStream(file));
       currentVersion.write();
       infos.clear();
       elementsQuantity = 0;
-      Main.project.setFileIndex();
+      parent.setFileIndex();
       int delta = 0;
       writeInt(elementsQuantity);
       writeInt(infos.size());

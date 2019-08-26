@@ -4,7 +4,7 @@ import parameters.ParameterTemplate;
 
 public class SineAlteration extends LinearAlteration {
   static {
-    ParameterTemplate[] templates = new ParameterTemplate[3];
+    ParameterTemplate[] templates = new ParameterTemplate[4];
     initTemplates(templates);
     parameterTemplates.put(SineAlteration.class, templates);
   }

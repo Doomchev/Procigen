@@ -1,6 +1,7 @@
 package base;
 
 import java.awt.image.BufferedImage;
+import structure.Project;
 
 public class RenderThread extends Thread {
   BufferedImage image;
@@ -15,7 +16,7 @@ public class RenderThread extends Thread {
 
   @Override
   public void run() {
-    Main.project.render(num);
+    Project.instance.render(num);
     Main.latch.countDown();
   }
 }

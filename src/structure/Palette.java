@@ -1,14 +1,15 @@
 package structure;
 
+import java.awt.Color;
 import java.io.IOException;
 
-public class Palette extends Element {
+public final class Palette extends Element {
   public String name;
   public Col[] colors;
   public Range[] ranges;
   
   public static class Range {
-    double rk, rb, gk, gb, bk, bb;
+    public double rk, rb, gk, gb, bk, bb;
 
     public Range(double x0, Col color0, double x1, Col color1) {
       rk = (color1.r - color0.r)/(x1 - x0);
@@ -27,8 +28,8 @@ public class Palette extends Element {
   }
   
   public static class Col {
-    int size;
-    double r, g, b;
+    public int size;
+    public double r, g, b;
 
     public Col(int size, double r, double g, double b) {
       this.size = size;
@@ -51,6 +52,10 @@ public class Palette extends Element {
 
     public Col copy() {
       return new Col(size, r, g, b);
+    }
+
+    public Color get() {
+      return new Color((int) r, (int) g, (int) b);
     }
   }
 
@@ -85,6 +90,11 @@ public class Palette extends Element {
   @Override
   public int updateProperties(int x0, int y0) {
     return y0;
+  }
+  
+  @Override
+  public int update(int x0, int y0, Element parent) {
+    return elementsColumn.addBlock(this, x0, y0, parent);
   }
   
   public void render(double[] pixels, double[] colors) {
@@ -135,6 +145,11 @@ public class Palette extends Element {
       writer.writeDouble(color.g);
       writer.writeDouble(color.b);
     }
+  }
+  
+  @Override
+  public Palette getPalette() {
+    return this;
   }
 
   @Override

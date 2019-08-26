@@ -8,6 +8,8 @@ import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 
 public class Project extends Element {
+  public static Project instance;
+  
   public static final int NAME = 0, ELEMENTS = 1, DURATION = 2;
   
   public double[][] threadColors = new double[threadsQuantity][]
@@ -53,8 +55,9 @@ public class Project extends Element {
         , new NewMenuItem("Add new bitmap", this, ELEMENTS, Bitmap.class, null)
         , new FileMenuItem("Open", FileMenuItem.OPEN)
         , new FileMenuItem("Save as", FileMenuItem.SAVE_AS)
-        , new RenderMenuItem(512, 512)
-        , new RenderMenuItem(1920, 1080));
+        , new RenderMenuItem(512, 512, true)
+        , new RenderMenuItem(1920, 1080, true)
+        , new RenderMenuItem(4096, 2160, false));
   }
   
   public synchronized void render(int thread) {

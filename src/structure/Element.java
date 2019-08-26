@@ -57,11 +57,8 @@ public abstract class Element extends Serialization implements Cloneable {
   }
   
   public ParameterTemplate[] getTemplates() {
-    
-    if(Serialization.oldTemplates != null) {
-      ParameterTemplate[] templates = Serialization.oldTemplates.get(getClass());
-      if(templates != null) return templates;
-    }
+    ParameterTemplate[] templates = Serialization.oldTemplates.get(getClass());
+    if(templates != null) return templates;
     return parameterTemplates.get(getClass());
   }
 

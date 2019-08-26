@@ -13,7 +13,8 @@ public class Bitmap extends Element {
     ParameterTemplate[] templates = new ParameterTemplate[3];
     templates[NAME] = new ParameterTemplate("Bitmap");
     templates[COMPOSITIONS] = new ParameterTemplate();
-    templates[PALETTE] = new ParameterTemplate("Palette", palettes, false);
+    templates[PALETTE] = new ParameterTemplate("Palette"
+        , Options.getPalettes(), false);
     parameterTemplates.put(Bitmap.class, templates);
   }
 

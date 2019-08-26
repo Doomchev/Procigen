@@ -13,7 +13,7 @@ public class Affine extends Transformation {
     templates[DY] = new ParameterTemplate("DY", 0.0);
     templates[XSCALE] = new ParameterTemplate("XScale", 1.0);
     templates[YSCALE] = new ParameterTemplate("XScale", 1.0);
-    templates[ANGLE] = new ParameterTemplate("Angle", 0.0, 0.0, 1.0);
+    templates[ANGLE] = new ParameterTemplate("Angle", 0.0);
     parameterTemplates.put(Affine.class, templates);
   }
   

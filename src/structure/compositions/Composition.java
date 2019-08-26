@@ -5,7 +5,6 @@ import gui.menu.RemoveMenuItem;
 import gui.menu.ToggleMenuItem;
 import java.util.LinkedList;
 import parameters.ParameterTemplate;
-import structure.Bitmap;
 import structure.Element;
 
 public abstract class Composition extends Element {

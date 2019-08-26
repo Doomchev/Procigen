@@ -3,11 +3,11 @@ package structure.compositions;
 import parameters.ParameterTemplate;
 
 public class CompositionArray extends SingleComposition {
-  public static final int ITEMS_OPERATION = 9, QUANTITY = 10;
+  public static final int ITEMS_OPERATION = 10, QUANTITY = 11;
   public static double[] arrayPixels = null;
   
   static {
-    ParameterTemplate[] templates = new ParameterTemplate[11];
+    ParameterTemplate[] templates = new ParameterTemplate[12];
     setTemplates(templates, "Composition array");
     templates[ITEMS_OPERATION] = new ParameterTemplate("Operation", operations);
     templates[QUANTITY] = new ParameterTemplate("Items quantity", 1.0, 1.0
@@ -29,15 +29,16 @@ public class CompositionArray extends SingleComposition {
     int itemsOperation = params[ITEMS_OPERATION].getValue();
     quantityValue = quantity;
     if(itemsOperation == operation) {
-      for(nValue = 0; nValue < quantity; nValue++)
+      for(nValue = 0; nValue < quantity; nValue++) {
+        cMultiplication = params[MULTIPLICATION].getDouble();
+        cIncrement = params[INCREMENT].getDouble();
         render(pixels, coords, itemsOperation, y0, height);
+      }
     } else {
-      if(arrayPixels == null) arrayPixels = new double[pixels.length];
+      /*if(arrayPixels == null) arrayPixels = new double[pixels.length];
       for(nValue = 0; nValue < quantity; nValue++)
         render(arrayPixels, coords, itemsOperation, y0, height);
-      mix(arrayPixels, pixels, itemsOperation);
+      mix(arrayPixels, pixels, itemsOperation);*/
     }
-    double multiplier = params[MULTIPLICATION].getDouble();
-    for(int index = 0; index < pixels.length; index++) pixels[index] *= multiplier;
   }
 }
