@@ -12,7 +12,7 @@ public class SineAlteration extends LinearAlteration {
   @Override
   public double getDouble() {
     double start = params[START].getDouble();
-    return template.limit(start + (params[END].getDouble() - start) * (1.0
-        + Math.cos(getK() * PI2)) * 0.5);
+    return start + (params[END].getDouble() - start) * (1.0
+        + Math.cos(getK() * PI2)) * 0.5;
   }  
 }

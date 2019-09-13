@@ -38,7 +38,7 @@ import structure.Palette.Col;
 import structure.Project;
 
 public class Main {
-  public static final Version currentVersion = new Version(0, 7);
+  public static final Version currentVersion = new Version(0, 8);
   public static final double PI2 = Math.PI * 2.0;
   public static final int elementsColumnWidth = 200, propertiesColumnWidth = 200
       , scaleBarHeight = 60, blockHeight = 20, blockIndent = 5, colorWidth = 32;
@@ -82,96 +82,97 @@ public class Main {
   public static final String[] orientation = array("Vertical", "Horizontal");
   public static final int ADD = 0, MULTIPLY = 1, MIN = 2, MAX = 3;
   public static final String[] operations = array("Add", "Multiply", "Min", "Max");
+  public static final String[] hLimits = array("None", "Left", "Right", "Both");
+  public static final String[] vLimits = array("None", "Top", "Bottom", "Both");
+  public static final int LEFT_LIMIT = 1, RIGHT_LIMIT = 2;
+  public static final int TOP_LIMIT = 1, BOTTOM_LIMIT = 2;
 
   public static <ElementType> ElementType[] array(ElementType... values) {
     return values;
   }
                 
   public static void renderToImages(int width, int height, boolean video) {
-    stopRender();
     imageWidth = width;
     imageHeight = height;
     Project.instance.init();
     BufferedImage image = new BufferedImage(width, height
         , BufferedImage.TYPE_INT_ARGB);
     
-    java.awt.EventQueue.invokeLater(() -> {
-      int quantity = (int) Math.ceil(30.0
-          * Project.instance.params[Project.DURATION].getDouble());
-      long start = System.currentTimeMillis();
-      frame.setTitle("Starting...");
-      for(int num = 0; num < quantity; num ++) {
-        timeValue = 1.0 * num / quantity;
-        try {
-          latch = new CountDownLatch(threadsQuantity);
-          int y = 0;
-          for(int index = 0; index < threadsQuantity; index++) {
-            threads[index + 1] = new RenderThread(images[index], 0, y, index);
-            threads[index + 1].start();
-            y += images[index].getHeight();
-          }
-          latch.await();
-
-          y = 0;
-          Graphics graphics = image.createGraphics();
-          for(int index = 0; index < threadsQuantity; index++) {
-            BufferedImage imagePart = images[index];
-            graphics.drawImage(imagePart, 0, y, null);
-            y += imagePart.getHeight();
-          }
-          graphics.dispose();
-          try {
-            ImageIO.write(image, "png", new File("D:/output/" + (num + 10000)
-                + ".png"));
-          } catch (IOException ex) {
-          }
-          int secs = (int) (1.0 * (System.currentTimeMillis() - start) / 1000.0
-              * (quantity - num) / num);
-          frame.setTitle(Math.floorDiv(secs, 60) + "m " + (secs % 60) + "s" );
-        } catch (InterruptedException ex) {
-          return;
+    int quantity = (int) Math.ceil(30.0
+        * Project.instance.params[Project.DURATION].getDouble());
+    long start = System.currentTimeMillis();
+    frame.setTitle("Starting...");
+    for(int num = 0; num < quantity; num ++) {
+      timeValue = 1.0 * num / quantity;
+      File file = new File("D:/output/" + (num + 10000)+ ".png");
+      if(file.exists()) continue;
+      try {
+        latch = new CountDownLatch(threadsQuantity);
+        int y = 0;
+        for(int index = 0; index < threadsQuantity; index++) {
+          //Project.instance.render(index);
+          threads[index + 1] = new RenderThread(images[index], 0, y, index);
+          threads[index + 1].start();
+          y += images[index].getHeight();
         }
-        if(!video) break;
+        latch.await();
+
+        y = 0;
+        Graphics graphics = image.createGraphics();
+        for(int index = 0; index < threadsQuantity; index++) {
+          BufferedImage imagePart = images[index];
+          graphics.drawImage(imagePart, 0, y, null);
+          y += imagePart.getHeight();
+        }
+        graphics.dispose();
+        try {
+          ImageIO.write(image, "png", file);
+        } catch (IOException ex) {
+        }
+        int secs = (int) (1.0 * (System.currentTimeMillis() - start) / 1000.0
+            * (quantity - num) / num);
+        frame.setTitle(Math.floorDiv(secs, 60) + "m " + (secs % 60) + "s" );
+      } catch (InterruptedException ex) {
+        return;
       }
-      frame.setTitle("Procigen");
-      imageWidth = (int) Math.ceil(renderWidth / detalization);
-      imageHeight = (int) Math.ceil(renderHeight / detalization);
-      Project.instance.init();
-      startRender();
-    });
+      if(!video) break;
+    }
+    frame.setTitle("Procigen");
   }
 
   public static void startRender() {
     if(threads[0] != null) return;
     System.out.println("base.Main.startRender()");
-    threads[0] = new Thread() {
-      @Override
-      public void run() {
-        while(true) {
-          timeValue = 0.001 * (System.currentTimeMillis() - startingTime)
-              / Project.instance.params[Project.DURATION].getDouble();
-          timeValue = timeValue - Math.floor(timeValue);
-          
-          try {
-            latch = new CountDownLatch(threadsQuantity);
-            int y = 0;
-            for(int index = 0; index < threadsQuantity; index++) {
-              threads[index + 1] = new RenderThread(images[index], 0, y, index);
-              threads[index + 1].start();
-              y += images[index].getHeight();
+    java.awt.EventQueue.invokeLater(() -> {
+      threads[0] = new Thread() {
+        @Override
+        public void run() {
+          while(true) {
+            timeValue = 0.001 * (System.currentTimeMillis() - startingTime)
+                / Project.instance.params[Project.DURATION].getDouble();
+            timeValue = timeValue - Math.floor(timeValue);
+
+            try {
+              latch = new CountDownLatch(threadsQuantity);
+              int y = 0;
+              for(int index = 0; index < threadsQuantity; index++) {
+                threads[index + 1] = new RenderThread(images[index], 0, y, index);
+                threads[index + 1].start();
+                y += images[index].getHeight();
+              }
+              latch.await();
+
+              repaintLatch = new CountDownLatch(1);
+              Main.renderPanel.repaint();
+              repaintLatch.await();
+            } catch (InterruptedException ex) {
+              return;
             }
-            latch.await();
-            
-            repaintLatch = new CountDownLatch(1);
-            Main.renderPanel.repaint();
-            repaintLatch.await();
-          } catch (InterruptedException ex) {
-            return;
           }
         }
-      }
-    };
-    threads[0].start();
+      };
+      threads[0].start();
+    });
   }
 
   public static void stopRender() {
@@ -394,20 +395,19 @@ public class Main {
                   }
                 }
                 selectedPalette.colors = newColors;
-                selectedPalette.init();
-                scalePanel.repaint();
-                startRender();
               }
-                  
+              selectedPalette.init();
+              scalePanel.repaint();
+              startRender();
             } else if(selectedProperty != null) {
               mouseStartingPos = e.getX();
+              scaleStartingPos = scalePos;
             }
           }
         }
         @Override
         public void mouseReleased(MouseEvent e) {
           mouseStartingPos = -1;
-          scaleStartingPos = scalePos;
         }
         @Override
         public void mouseEntered(MouseEvent e) {
@@ -515,20 +515,6 @@ public class Main {
   public static void addNew(Element container, int index, Element element) {
     container.params[index].getList().add(element);
     element.init();
-  }
-
-  public static void initCoords(double [] coords, int y0, int height) {
-    int pos = 0;
-    int dx = imageWidth / 2;
-    int dy = imageHeight / 2;
-    double scale = 12.0 / imageHeight;
-    for(int y = 0; y < height; y++) {
-      for(int x = 0; x < imageWidth; x++) {
-        coords[pos] = (x - dx) * scale;
-        coords[pos + 1] = (y0 + y - dy) * scale;
-        pos += 2;
-      }
-    }
   }
   
   public static void updateProject() {

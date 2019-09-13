@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import structure.Element;
 
 public class ParameterTemplate extends Serialization {
-  public static final int DOUBLE = 0, ELEMENT = 1, ENUM = 2, LIST = 3, STRING = 4;
+  public static final int DOUBLE = 0, ELEMENT = 1, ENUM = 2, LIST = 3
+      , STRING = 4, NEW_ELEMENT = 5;
   
   public int type;
   public String caption;
@@ -39,7 +40,7 @@ public class ParameterTemplate extends Serialization {
       , boolean isNew) {
     this.caption = caption;
     this.elements = elements;
-    this.type = isNew ? ELEMENT : ELEMENT;
+    this.type = isNew ? NEW_ELEMENT : ELEMENT;
   }
   
   public ParameterTemplate(String caption, String... values) {
@@ -69,6 +70,8 @@ public class ParameterTemplate extends Serialization {
         return new DoubleValue(initialValue);
       case ELEMENT:
         return new ElementValue(elements.getFirst());
+      case NEW_ELEMENT:
+        return new ElementValue(elements.getFirst());
       case ENUM:
         return new EnumValue(0);
       case LIST:
@@ -76,7 +79,7 @@ public class ParameterTemplate extends Serialization {
       case STRING:
         return new StringValue(caption);
     }
-    System.err.println("Wrong parameter template.");
+    System.err.println("Wrong parameter template "  + type);
     return null;
   }
 
@@ -103,6 +106,7 @@ public class ParameterTemplate extends Serialization {
         element.setTemplate(this);
         return element;
       case ELEMENT:
+      case NEW_ELEMENT:
         return new ElementValue(allElements[readInt()]);
       case ENUM:
         return new EnumValue(readInt());
@@ -125,5 +129,10 @@ public class ParameterTemplate extends Serialization {
     } else {
       param.write();
     }
+  }
+
+  @Override
+  public String toString() {
+    return caption;
   }
 }

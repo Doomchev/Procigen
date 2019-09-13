@@ -1,5 +1,6 @@
 package structure.patterns;
 
+import base.RenderingBitmap;
 import parameters.ParameterTemplate;
 import static java.lang.Math.*;
 
@@ -16,32 +17,19 @@ public class Beam extends Gradient {
   }
   
   @Override
-  public void render(double[] coords, double[] pixels, int operation
-      , double multiplier) {
+  public void render(RenderingBitmap bitmap) {
     int dc = params[TYPE].getValue() == VERTICAL ? 0 : 1;
     double shift = params[SHIFT].getDouble();
     boolean many = params[QUANTITY].getValue() == MANY;
-    for(int index = 0; index < pixels.length; index++) {
+    double[] pixels = bitmap.pixels;
+    double[] coords = bitmap.coords;
+    for(int index = 0; index < bitmap.size; index++) {
       double x = coords[(index << 1) + dc];
       if(many) {
         x = (x + shift) * 0.5;
         x = (x - Math.floor(x)) * 2.0 - 1.0;
       }
-      x = Math.max(0, one - abs(x)) * cMultiplication + cIncrement;
-      switch(operation) {
-        case ADD:
-          pixels[index] += x;
-          break;
-        case MULTIPLY:
-          pixels[index] *= x;
-          break;
-        case MIN:
-          pixels[index] = Math.min(pixels[index], x);
-          break;
-        case MAX:
-          pixels[index] = Math.max(pixels[index], x);
-          break;
-      }
+      pixels[index] = Math.max(0, one - abs(x)) * cMultiplication + cIncrement;
     }
   }
 }

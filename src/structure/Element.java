@@ -1,5 +1,6 @@
 package structure;
 
+import base.RenderingBitmap;
 import base.Serialization;
 import base.Serialization.Info;
 import parameters.ParameterTemplate;
@@ -55,10 +56,17 @@ public abstract class Element extends Serialization implements Cloneable {
   public Palette getPalette() {
     return (Palette) getElement();
   }
+
+  public String getName() {
+    return "";
+  }
+
+  public void rename(String showInputDialog) {
+  }
   
   public ParameterTemplate[] getTemplates() {
-    ParameterTemplate[] templates = Serialization.oldTemplates.get(getClass());
-    if(templates != null) return templates;
+    Mapping mapping = Serialization.mappings.get(getClass());
+    if(mapping != null) return mapping.templates;
     return parameterTemplates.get(getClass());
   }
 
@@ -69,14 +77,13 @@ public abstract class Element extends Serialization implements Cloneable {
   public void draw(Graphics g, int x, int y, int scrollY, int height) {
   }
 
-  public void render(double[] colors, double[] pixels, double[] coords, int y0
-      , int height) {
+  public void renderColors(RenderingBitmap bitmap) {
   }
 
-  public void render(double[] pixels, double[] coords, int y0, int height) {
+  public void renderCoords(RenderingBitmap bitmap) {
   }
 
-  public void applyTransformation(double[] coords) {
+  public void applyTransformation(RenderingBitmap bitmap) {
   }
 
   public int update(int x0, int y0, Element parent) {
@@ -117,8 +124,11 @@ public abstract class Element extends Serialization implements Cloneable {
   public void read() throws IOException {
     ParameterTemplate[] templates = getTemplates();
     params = new Element[templates.length];
-    for(int index = 0; index < templates.length; index++)
+    for(int index = 0; index < templates.length; index++) {
+      System.out.println("::"  + templates[index].caption);
       params[index] = templates[index].read();
+      System.out.println(":::: = " + params[index].toString());
+    }
   }
 
   public void setFileIndex() {

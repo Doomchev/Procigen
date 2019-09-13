@@ -1,5 +1,6 @@
 package structure.patterns;
 
+import base.RenderingBitmap;
 import parameters.ParameterTemplate;
 
 public class Gradient extends Pattern {
@@ -13,27 +14,14 @@ public class Gradient extends Pattern {
   }
   
   @Override
-  public void render(double[] coords, double[] pixels, int operation
-      , double multiplier) {
+  public void render(RenderingBitmap bitmap) {
     int dc = params[TYPE].getValue() == VERTICAL ? 0 : 1;
     double shift = params[SHIFT].getDouble();
-    for(int index = 0; index < pixels.length; index++) {
-      double x = (coords[(index << 1) + dc] * multiplier - shift)
+    double[] pixels = bitmap.pixels;
+    double[] coords = bitmap.coords;
+    for(int index = 0; index < bitmap.size; index++) {
+      pixels[index] = (coords[(index << 1) + dc] - shift)
           * cMultiplication + cIncrement;
-      switch(operation) {
-        case ADD:
-          pixels[index] += x;
-          break;
-        case MULTIPLY:
-          pixels[index] *= x;
-          break;
-        case MIN:
-          pixels[index] = Math.min(pixels[index], x);
-          break;
-        case MAX:
-          pixels[index] = Math.max(pixels[index], x);
-          break;
-      }
     }
   }
 }

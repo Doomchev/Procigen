@@ -1,5 +1,6 @@
 package structure;
 
+import base.RenderingBitmap;
 import gui.menu.MoveMenuItem;
 import gui.menu.NewMenuItem;
 import gui.menu.RemoveMenuItem;
@@ -14,7 +15,7 @@ public class Bitmap extends Element {
     templates[NAME] = new ParameterTemplate("Bitmap");
     templates[COMPOSITIONS] = new ParameterTemplate();
     templates[PALETTE] = new ParameterTemplate("Palette"
-        , Options.getPalettes(), false);
+        , Options.getPalettes(), true);
     parameterTemplates.put(Bitmap.class, templates);
   }
 
@@ -39,12 +40,11 @@ public class Bitmap extends Element {
   }
   
   @Override
-  public void render(double[] colors, double[] pixels, double[] coords
-      , int y0, int height) {
+  public void renderColors(RenderingBitmap bitmap) {
     if(hide) return;
-    for(int index = 0; index < pixels.length; index++) pixels[index] = 0;
+    for(int index = 0; index < bitmap.size; index++) bitmap.pixels[index] = 0;
     for(Element composition : params[COMPOSITIONS].getList())
-      composition.render(pixels, coords, y0, height);
-    params[PALETTE].getPalette().render(pixels, colors);
+      composition.renderCoords(bitmap);
+    params[PALETTE].getPalette().render(bitmap);
   }
 }

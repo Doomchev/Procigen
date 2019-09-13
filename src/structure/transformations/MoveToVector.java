@@ -2,6 +2,7 @@ package structure.transformations;
 
 import static base.Main.PI2;
 import static base.Main.parameterTemplates;
+import base.RenderingBitmap;
 import parameters.ParameterTemplate;
 
 public class MoveToVector extends Transformation {
@@ -16,13 +17,14 @@ public class MoveToVector extends Transformation {
   
 
   @Override
-  public void applyTransformation(double[] coords) {
+  public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
     double radius = params[RADIUS].getDouble();
     double angle = PI2 * params[ANGLE].getDouble();
     double dx = Math.cos(angle) * radius;
     double dy = Math.sin(angle) * radius;
-    for(int index = 0; index < coords.length; index += 2) {
+    double[] coords = bitmap.coords;
+    for(int index = 0; index < bitmap.size2; index += 2) {
       coords[index] += dx;
       coords[index + 1] += dy;
     }

@@ -4,25 +4,23 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/Dropbox/Procigen/src/structure/compositions/CompositionArray.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/structure/transformations/LoopSector.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/alterations/ChainedLinearAlteration.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/structure/transformations/Transformation.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/structure/transformations/MoveToVector.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/structure/transformations/Sine.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/structure/patterns/Beam.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/structure/Options.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/base/Render512.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/structure/patterns/Pattern.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/base/RenderingBitmap.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/compositions/SingleComposition.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/structure/patterns/Beam.java</file>
             <file>file:/D:/Dropbox/Procigen/src/gui/PropertyBlock.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/base/Version.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/alterations/ChainedSineAlteration.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/gui/menu/AlterationMenuItem.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/Element.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/base/Templates.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/alterations/Alteration.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/base/Templates.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/alterations/LinearAlteration.java</file>
             <file>file:/D:/Dropbox/Procigen/src/base/Main.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/patterns/Gradient.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/gui/menu/RenderMenuItem.java</file>
-            <file>file:/D:/Dropbox/Procigen/src/structure/transformations/Radial.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/structure/Bitmap.java</file>
+            <file>file:/D:/Dropbox/Procigen/src/structure/Palette.java</file>
             <file>file:/D:/Dropbox/Procigen/src/parameters/ParameterTemplate.java</file>
             <file>file:/D:/Dropbox/Procigen/src/structure/alterations/SineAlteration.java</file>
             <file>file:/D:/Dropbox/Procigen/src/base/Serialization.java</file>

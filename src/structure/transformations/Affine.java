@@ -3,6 +3,7 @@ package structure.transformations;
 import parameters.ParameterTemplate;
 import static java.lang.Math.*;
 import static base.Main.parameterTemplates;
+import base.RenderingBitmap;
 
 public class Affine extends Transformation {
   public static final int DX = 0, DY = 1, XSCALE = 2, YSCALE = 3, ANGLE = 4;
@@ -18,19 +19,19 @@ public class Affine extends Transformation {
   }
   
   @Override
-  public void applyTransformation(double[] coords) {
+  public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
-    apply(coords, params[DX].getDouble(), params[DY].getDouble()
+    apply(bitmap, params[DX].getDouble(), params[DY].getDouble()
         , params[XSCALE].getDouble(), params[YSCALE].getDouble()
         , params[ANGLE].getDouble());
   }
   
-  public static void apply(double[] coords, double dx, double dy, double scale
-      , double angle) {
-    apply(coords, dx, dy, scale, scale, angle);
+  public static void apply(RenderingBitmap bitmap, double dx, double dy
+      , double scale, double angle) {
+    apply(bitmap, dx, dy, scale, scale, angle);
   }
-  public static void apply(double[] coords, double dx, double dy, double xScale
-      , double yScale, double angle) {
+  public static void apply(RenderingBitmap bitmap, double dx, double dy
+      , double xScale, double yScale, double angle) {
 		double xk = 1.0 / xScale;
 		double yk = 1.0 / yScale;
 		angle = angle * PI2;
@@ -40,7 +41,8 @@ public class Affine extends Transformation {
 		double yk1 = -sinAngle * yk;
 		double xk2 = sinAngle * xk;
 		double yk2 = cosAngle * yk; 
-    for(int index = 0; index < coords.length; index += 2) {
+    double[] coords = bitmap.coords;
+    for(int index = 0; index < bitmap.size2; index += 2) {
       double x = coords[index] - dx;
       double y = coords[index + 1] - dy;
       coords[index] = x * xk1 + y * yk1;

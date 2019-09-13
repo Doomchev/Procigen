@@ -23,14 +23,12 @@ public class LinearAlteration extends Alteration {
 
   public double getK() {
     double part = params[N_PART].getDouble();
-    double k = part * nValue / quantityValue + timeValue * (1.0 - part)
-        + params[SHIFT].getDouble();
-    return k - Math.floor(k);
+    return part * nValue / quantityValue + getTime() * (1.0 - part);
   }
 
   @Override
   public double getDouble() {
     double start = params[START].getDouble();
-    return template.limit(start + (params[END].getDouble() - start) * getK());
+    return start + (params[END].getDouble() - start) * getK();
   }  
 }

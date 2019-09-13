@@ -1,3 +1,6 @@
+2019.09.13 (version 0.8)
+  + Limits of output window.
+	+ Serialization version stacking.
 2019.08.26 (version 0.7)
   + Palette editor.
   + Saving / loading configuration.

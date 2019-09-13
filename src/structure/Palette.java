@@ -1,5 +1,7 @@
 package structure;
 
+import base.RenderingBitmap;
+import gui.menu.RenameMenuItem;
 import java.awt.Color;
 import java.io.IOException;
 
@@ -86,6 +88,16 @@ public final class Palette extends Element {
       }
     }    
   }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public void rename(String name) {
+    this.name = name;
+  }
   
   @Override
   public int updateProperties(int x0, int y0) {
@@ -96,15 +108,22 @@ public final class Palette extends Element {
   public int update(int x0, int y0, Element parent) {
     return elementsColumn.addBlock(this, x0, y0, parent);
   }
+
+  @Override
+  public void menu(int x, int y, Element parent) {
+    showMenu(x, y, new RenameMenuItem(this));
+  }
   
-  public void render(double[] pixels, double[] colors) {
+  public void render(RenderingBitmap bitmap) {
     double size = ranges.length;
     int pos = 0;
-    for(int index = 0; index < pixels.length; index++) {
-      double value = pixels[index];
+    double[] bitmapPixels = bitmap.pixels;
+    double[] bitmapColors = bitmap.colors;
+    for(int index = 0; index < bitmap.size; index++) {
+      double value = bitmapPixels[index];
       value = value - Math.floor(value);
       if(value >= 1.0) value = 0.0;
-      ranges[(int) Math.floor(value * size)].setColor(colors, pos, value);
+      ranges[(int) Math.floor(value * size)].setColor(bitmapColors, pos, value);
       pos += 3;
     }
   }

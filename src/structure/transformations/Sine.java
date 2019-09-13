@@ -2,6 +2,7 @@ package structure.transformations;
 
 import static base.Main.PI2;
 import static base.Main.parameterTemplates;
+import base.RenderingBitmap;
 import parameters.ParameterTemplate;
 
 public class Sine extends Transformation {
@@ -21,7 +22,7 @@ public class Sine extends Transformation {
   
 
   @Override
-  public void applyTransformation(double[] coords) {
+  public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
     double hSize = params[H_SIZE].getDouble();
     double hAmplitude = 1.0 / params[H_AMPLITUDE].getDouble();
@@ -29,7 +30,8 @@ public class Sine extends Transformation {
     double vSize = params[V_SIZE].getDouble();
     double vAmplitude = 1.0 / params[V_AMPLITUDE].getDouble();
     double vShift = params[V_SHIFT].getDouble();
-    for(int index = 0; index < coords.length; index += 2) {
+    double[] coords = bitmap.coords;
+    for(int index = 0; index < bitmap.size2; index += 2) {
       coords[index] += Math.sin((coords[index + 1] * hSize + hShift) * PI2)
           * hAmplitude;
       coords[index + 1] += Math.sin((coords[index] * vSize + vShift) * PI2)

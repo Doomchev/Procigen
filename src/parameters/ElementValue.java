@@ -1,7 +1,6 @@
 package parameters;
 
 import static base.Main.currentMenu;
-import static base.Serialization.writer;
 import gui.menu.ElementValueMenuItem;
 import java.io.IOException;
 import structure.Element;
@@ -26,7 +25,7 @@ public class ElementValue extends Element {
   @Override
   public void menu(ParameterTemplate template, int x0
       , int y0) {
-    for(Element value : template.elements)
+    for(Element value : template.elements) 
       (new ElementValueMenuItem(this, value)).addTo(currentMenu);
   }
   

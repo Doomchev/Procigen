@@ -10,7 +10,12 @@ public class Alteration extends Element {
   public static void initTemplates(ParameterTemplate[] templates) {
     templates[START] = new ParameterTemplate("Start", 0.0);
     templates[END] = new ParameterTemplate("End", 1.0);
-    templates[SHIFT] = new ParameterTemplate("Shift", 0.0, 0.0, 1.0);
+    templates[SHIFT] = new ParameterTemplate("Shift", 0.0);
+  }
+  
+  public double getTime() {
+    double k = timeValue + params[SHIFT].getDouble();
+    return k - Math.floor(k);
   }
 
   @Override

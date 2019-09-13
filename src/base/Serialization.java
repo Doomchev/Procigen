@@ -20,43 +20,49 @@ import structure.alterations.ChainedSineAlteration;
 import structure.alterations.LinearAlteration;
 import structure.alterations.SineAlteration;
 import structure.compositions.CompositionArray;
+import structure.compositions.SingleComposition;
 
 public class Serialization extends Main {
   private static final int DOUBLE = -1, ELEMENT = -2, ENUM = -3, LIST = -4
       , STRING = -5;
 
-  public static final HashMap<Class, ParameterTemplate[]> oldTemplates = new HashMap<>();
-  public static final HashMap<Class, int[]> templateMapping = new HashMap<>();
+  public static final HashMap<Class, Mapping> mappings = new HashMap<>();
   public static DataOutputStream writer;
   public static DataInputStream reader;
   public static int elementsQuantity;
   public static Element[] allElements;
   public static final HashMap<Class, Info> infos = new HashMap<>();
   //public static final HashMap<String, Info>
-  
+
   public static class Info {
     public final HashSet<Element> elementExists = new HashSet<>();
     public final LinkedList<Element> elements = new LinkedList<>();
   }
   
-  public static void fill(Class elementClass, int quantity, int ... params) {
-    ParameterTemplate[] newTemplates = parameterTemplates.get(elementClass);
-    ParameterTemplate[] templates = new ParameterTemplate[quantity];
-    int[] map = new int[newTemplates.length];
-    for(int index = 0; index < map.length; index++) map[index] = -1;
-    for(int index = 0; index < quantity; index++) {
-      int mapIndex = params[index];
-      if(mapIndex >= newTemplates.length) {
-        System.err.println(elementClass.getSimpleName() + " < " + mapIndex);
-      } else if(mapIndex >= 0) {
-        templates[index] = newTemplates[mapIndex];
-        map[mapIndex] = index;
-      } else {
-        templates[index] = new ParameterTemplate(mapIndex);
-      }
+  public static class Mapping {
+    public ParameterTemplate[] templates;
+    public int[] maps;
+
+    public Mapping(ParameterTemplate[] templates, int[] maps) {
+      this.templates = templates;
+      this.maps = maps;
     }
-    templateMapping.put(elementClass, map);
-    oldTemplates.put(elementClass, templates);
+  }
+  
+  public static void fill(Class elementClass, int ... params) {
+    Mapping mapping = mappings.get(elementClass);
+    if(mapping != null) {
+      int[] maps = mapping.maps;
+      int quantity = maps.length;
+      int[] array = new int[quantity];
+      System.arraycopy(maps, 0, array, 0, quantity);
+      for(int index = 0; index < quantity; index++) {
+        int index2 = array[index];
+        if(index2 >= 0) maps[index] = params[index2];
+      }
+    } else {
+      mappings.put(elementClass, new Mapping(null, params));
+    }
   }
       
   public static void load(File file, boolean isProject) {
@@ -72,13 +78,41 @@ public class Serialization extends Main {
       Version fileVersion = Version.read();
       
       if(fileVersion.lessThan(new Version(0, 6, 2))) {
-        fill(CompositionArray.class, 11, 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, DOUBLE);
+        fill(CompositionArray.class, 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11);
       }
       if(fileVersion.lessThan(new Version(0, 6, 3))) {
-        fill(LinearAlteration.class, 3, 0, 1, 3);
-        fill(SineAlteration.class, 3, 0, 1, 3);
-        fill(ChainedLinearAlteration.class, 2, 0, 1);
-        fill(ChainedSineAlteration.class, 3, 0, 1, 3);
+        fill(LinearAlteration.class, 0, 1, 3);
+        fill(SineAlteration.class, 0, 1, 3);
+        fill(ChainedLinearAlteration.class, 0, 1);
+        fill(ChainedSineAlteration.class, 0, 1, 3);
+      }
+      if(fileVersion.lessThan(new Version(0, 7, 1))) {
+        fill(ChainedLinearAlteration.class, 0, 1, 2);
+        fill(ChainedSineAlteration.class, 0, 1, 2, 3);
+      }
+      if(fileVersion.lessThan(new Version(0, 8))) {
+        fill(CompositionArray.class, 0, 1, 2, 3, 6, 7, 8, 9, 16, 17, 18, 19);
+        fill(SingleComposition.class, 0, 1, 2, 3, 6, 7, 8, 9, 16, 17);
+      }
+      
+      for(Entry<Class, Mapping> entry : mappings.entrySet()) {
+        Class elementClass = entry.getKey();
+        Mapping mapping = entry.getValue();
+        int[] params = mapping.maps;
+        int quantity = params.length;
+        ParameterTemplate[] newTemplates = parameterTemplates.get(elementClass);
+        ParameterTemplate[] templates = new ParameterTemplate[quantity];
+        for(int index = 0; index < params.length; index++) {
+          int mapIndex = params[index];
+          if(mapIndex >= newTemplates.length) {
+            System.err.println(elementClass.getSimpleName() + " < " + mapIndex);
+          } else if(mapIndex >= 0) {
+            templates[index] = newTemplates[mapIndex];
+          } else {
+            templates[index] = new ParameterTemplate(mapIndex);
+          }
+        }
+        mapping.templates = templates;
       }
       
       elementsQuantity = readInt();
@@ -101,37 +135,28 @@ public class Serialization extends Main {
       }
       for(int index = 0; index < elementsQuantity; index++) {
         Element element = allElements[index];
+        System.out.println(element.getClass().getSimpleName());
         element.read();
-        ParameterTemplate[] templates = oldTemplates.get(element.getClass());
-        if(templates != null) {
+        Mapping mapping = mappings.get(element.getClass());
+        if(mapping != null) {
+          int[] map = mapping.maps;
           ParameterTemplate[] newTemplates = parameterTemplates.get(
               element.getClass());
-          int[] map = templateMapping.get(element.getClass());
           Element[] params = new Element[newTemplates.length];
-          for(int paramIndex = 0; paramIndex < newTemplates.length; paramIndex++) {
-            int mapIndex = map[paramIndex];
-            if(mapIndex < 0) {
-              params[paramIndex] = newTemplates[paramIndex].createParameter();
-            } else {
-              params[paramIndex] = element.params[mapIndex];
-            }
+          for(int index2 = 0; index2 < map.length; index2++) {
+            int mapIndex = map[index2];
+            if(mapIndex >= 0) params[mapIndex] = element.params[index2];
+          }
+          for(int index2 = 0; index2 < params.length; index2++) {
+            if(params[index2] == null)
+              params[index2] = newTemplates[index2].createParameter();
           }
           element.params = params;
         }
       }
       
-      oldTemplates.clear();
-      reader.close();
-      
-      if(isProject) {
-        stopRender();
-        Project.instance.init();
-        updateProject();
-        selectedElement = null;
-        updateProperties();
-        startRender();
-      }
-      
+      mappings.clear();
+      reader.close();      
     } catch (FileNotFoundException ex) {
       System.out.println(ex.toString());
     } catch (IOException | ClassNotFoundException | InstantiationException

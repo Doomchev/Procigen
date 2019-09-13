@@ -1,6 +1,11 @@
 package gui.menu;
 
 import base.Main;
+import static base.Main.selectedElement;
+import static base.Main.startRender;
+import static base.Main.stopRender;
+import static base.Main.updateProject;
+import static base.Main.updateProperties;
 import base.Serialization;
 import java.awt.event.ActionEvent;
 import java.io.BufferedInputStream;
@@ -44,12 +49,18 @@ public class FileMenuItem extends MenuItem {
       public String getDescription() {
         return "Procedurally generated image (*.pgi)";
       }
-    })
-        ;
+    });
     switch(operation) {
       case OPEN:
-        if(chooser.showDialog(null, "Select file to open") == APPROVE_OPTION)
+        if(chooser.showDialog(null, "Select file to open") == APPROVE_OPTION) {
           Serialization.load(chooser.getSelectedFile(), true);
+          stopRender();
+          Project.instance.init();
+          updateProject();
+          selectedElement = null;
+          updateProperties();
+          startRender();
+        }
         break;
       case SAVE_AS:
         if(chooser.showDialog(null, "Select file to save as") == APPROVE_OPTION) {

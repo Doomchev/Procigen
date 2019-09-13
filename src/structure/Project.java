@@ -1,5 +1,6 @@
 package structure;
 
+import base.RenderingBitmap;
 import gui.menu.FileMenuItem;
 import gui.menu.NewMenuItem;
 import gui.menu.RenderMenuItem;
@@ -12,10 +13,7 @@ public class Project extends Element {
   
   public static final int NAME = 0, ELEMENTS = 1, DURATION = 2;
   
-  public double[][] threadColors = new double[threadsQuantity][]
-      , threadCoords = new double[threadsQuantity][]
-      , threadPixels = new double[threadsQuantity][];
-  public int[] topY = new int[threadsQuantity];
+  public RenderingBitmap[] bitmaps = new RenderingBitmap[threadsQuantity];
   
   static {
     ParameterTemplate[] templates = new ParameterTemplate[3];
@@ -32,15 +30,23 @@ public class Project extends Element {
     for(int index = 0; index < threadsQuantity; index++) {
       int y0 = Math.floorDiv(index * imageHeight, threadsQuantity);
       int y1 = Math.floorDiv((index + 1) * imageHeight, threadsQuantity);
-      BufferedImage image = new BufferedImage(imageWidth, y1 - y0
+      int height = y1 - y0;
+      
+      RenderingBitmap bitmap = new RenderingBitmap();
+      BufferedImage image = new BufferedImage(imageWidth, height
             , BufferedImage.TYPE_INT_ARGB);
       images[index] = image;
-      int imageSize = image.getWidth() * image.getHeight();
-      threadColors[index] = new double[imageSize * 3];
-      threadCoords[index] = new double[imageSize * 2];
-      threadPixels[index] = new double[imageSize];
-      topY[index] = y;
-      y += image.getHeight();
+      int imageSize = imageWidth * height;
+      bitmap.initArrays(imageSize);
+      bitmap.tempBitmap = bitmap.copy();
+      bitmap.x = 0;
+      bitmap.y = y;
+      bitmap.width = imageWidth;
+      bitmap.height = height;
+      bitmap.size = imageSize;
+      bitmap.size2 = imageSize * 2;
+      bitmaps[index] = bitmap;
+      y += height;
     }
   }
 
@@ -61,23 +67,18 @@ public class Project extends Element {
   }
   
   public synchronized void render(int thread) {
-    double colors[] = threadColors[thread];
-    double coords[] = threadCoords[thread];
-    double pixels[] = threadPixels[thread];
+    RenderingBitmap bitmap = bitmaps[thread];
+    double colors[] = bitmap.colors;
     BufferedImage image = images[thread];
-    int width = image.getWidth();
-    int height = image.getHeight();
     
-    for(int index = 0; index < coords.length; index++) coords[index] = 0;
-    for(Element element : params[ELEMENTS].getList()) element.render(
-        colors, pixels, coords, topY[thread], height);
+    for(Element element : params[ELEMENTS].getList()) element.renderColors(bitmap);
     int colorIndex = 0;
-    for(int index = 0; index < pixels.length; index++) {
+    for(int index = 0; index < bitmap.size; index++) {
       int r = (int) Math.round(colors[colorIndex]);
       int g = (int) Math.round(colors[colorIndex + 1]);
       int b = (int) Math.round(colors[colorIndex + 2]);
-      image.setRGB(index % width, Math.floorDiv(index, width), b + (g << 8)
-          + (r << 16) + (255 << 24));
+      image.setRGB(index % bitmap.width, Math.floorDiv(index, bitmap.width)
+          , b + (g << 8) + (r << 16) + (255 << 24));
       colorIndex += 3;
     }
   }
