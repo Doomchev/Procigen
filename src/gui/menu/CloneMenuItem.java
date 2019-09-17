@@ -2,6 +2,7 @@ package gui.menu;
 
 import base.Main;
 import static base.Main.refresh;
+import base.Render;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
 import structure.Element;
@@ -26,13 +27,13 @@ public class CloneMenuItem extends MenuItem {
   @Override
   public void actionPerformed(ActionEvent e) {
     Element newElement = (Element) element.createNew();
-    Main.stopRender();
+    Render.stop();
     if(afterElement == null) {
       container.addFirst(newElement);
     } else {
       container.add(container.indexOf(afterElement) + 1, newElement);
     }
     refresh();
-    Main.startRender();
+    Render.start();
   }
 }

@@ -140,7 +140,7 @@ public final class Palette extends Element {
   }
   
   @Override
-  public void read() throws IOException {
+  public void read(boolean newFormat) throws IOException {
     name = readString();
     int colorsQuantity = readInt();
     colors = new Col[colorsQuantity];

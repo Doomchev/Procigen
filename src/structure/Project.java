@@ -17,8 +17,8 @@ public class Project extends Element {
   
   static {
     ParameterTemplate[] templates = new ParameterTemplate[3];
-    templates[NAME] = new ParameterTemplate("Project");
-    templates[ELEMENTS] = new ParameterTemplate();
+    templates[NAME] = new ParameterTemplate("Name", true);
+    templates[ELEMENTS] = new ParameterTemplate("Elements");
     templates[DURATION] = new ParameterTemplate("Duration", 5.0, 0.05, 0.0);
     parameterTemplates.put(Project.class, templates);
   }

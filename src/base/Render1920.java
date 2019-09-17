@@ -25,7 +25,7 @@ public class Render1920  {
       Main.frame.setVisible(true);
       Serialization.load(new File("configuration.bin"), false);
       Serialization.load(chooser.getSelectedFile(), true);
-      Main.renderToImages(1920, 1080, true);
+      Render.renderToImages(1920, 1080, true);
       Main.frame.dispose();
     }
   }

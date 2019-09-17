@@ -1,6 +1,7 @@
 package gui.menu;
 
 import base.Main;
+import base.Render;
 import java.awt.event.ActionEvent;
 import structure.Project;
 
@@ -17,11 +18,11 @@ public class RenderMenuItem extends MenuItem {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    Main.stopRender();
-    Main.renderToImages(width, height, video);
+    Render.stop();
+    Render.renderToImages(width, height, video);
     Main.imageWidth = (int) Math.ceil(Main.renderWidth / Main.detalization);
     Main.imageHeight = (int) Math.ceil(Main.renderHeight / Main.detalization);
     Project.instance.init();
-    Main.startRender();
+    Render.start();
   }
 }

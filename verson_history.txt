@@ -1,3 +1,6 @@
+2019.09.17 (version 0.9)
+	* New file format (added identifiers and types).
+	* All examples converted to new format.
 2019.09.13 (version 0.8)
   + Limits of output window.
 	+ Serialization version stacking.

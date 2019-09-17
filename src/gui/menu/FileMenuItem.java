@@ -1,11 +1,9 @@
 package gui.menu;
 
-import base.Main;
 import static base.Main.selectedElement;
-import static base.Main.startRender;
-import static base.Main.stopRender;
 import static base.Main.updateProject;
 import static base.Main.updateProperties;
+import base.Render;
 import base.Serialization;
 import java.awt.event.ActionEvent;
 import java.io.BufferedInputStream;
@@ -54,12 +52,12 @@ public class FileMenuItem extends MenuItem {
       case OPEN:
         if(chooser.showDialog(null, "Select file to open") == APPROVE_OPTION) {
           Serialization.load(chooser.getSelectedFile(), true);
-          stopRender();
+          Render.stop();
           Project.instance.init();
           updateProject();
           selectedElement = null;
           updateProperties();
-          startRender();
+          Render.start();
         }
         break;
       case SAVE_AS:

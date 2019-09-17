@@ -10,7 +10,7 @@ public class Options extends Element {
   
   static {
     ParameterTemplate[] templates = new ParameterTemplate[1];
-    templates[PALETTES] = new ParameterTemplate();
+    templates[PALETTES] = new ParameterTemplate("Palettes");
     parameterTemplates.put(Options.class, templates);
   }
 

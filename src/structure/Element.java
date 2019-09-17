@@ -1,5 +1,6 @@
 package structure;
 
+import base.ID;
 import base.RenderingBitmap;
 import base.Serialization;
 import base.Serialization.Info;
@@ -112,22 +113,36 @@ public abstract class Element extends Serialization implements Cloneable {
 
   public int updateProperties(int x0, int y0) {
     for(int index = 0; index < params.length; index++) {
-      int type = getTemplate(index).type;
-      if(type == ParameterTemplate.LIST || type == ParameterTemplate.STRING)
-        continue;
+      if(getTemplate(index).hidden) continue;
       y0 = propertiesColumn.addBlock(this, index, x0, y0);
       y0 = params[index].updateProperties(x0 + blockIndent, y0);
     }
     return y0;
   }
 
-  public void read() throws IOException {
+  public void read(boolean newFormat) throws IOException {
     ParameterTemplate[] templates = getTemplates();
     params = new Element[templates.length];
-    for(int index = 0; index < templates.length; index++) {
-      System.out.println("::"  + templates[index].caption);
-      params[index] = templates[index].read();
-      System.out.println(":::: = " + params[index].toString());
+    if(newFormat) {
+      int fieldsQuantity = readInt();
+      for(int index = 0; index < fieldsQuantity; index++) {
+        int idIndex = readInt();
+        String id = ids[idIndex];
+        for(int index2 = 0; index2 < templates.length; index2++) {
+          ParameterTemplate template = templates[index2];
+          if(template.caption.equals(id)) {
+            params[index2] = template.read();
+            break;
+          } else if(index2 == templates.length - 1)
+            ParameterTemplate.readValue(types[idIndex]);
+        }
+      }
+      for(int index = 0; index < templates.length; index++)
+        if(params[index] == null)
+          params[index] = templates[index].createParameter();
+    } else {
+      for(int index = 0; index < templates.length; index++)
+        params[index] = templates[index].read();
     }
   }
 
@@ -138,7 +153,13 @@ public abstract class Element extends Serialization implements Cloneable {
     info.elementExists.add(this);
     info.elements.add(this);
     elementsQuantity++;
-    for(Element param : params) param.setFileIndex();
+    ParameterTemplate[] templates = getTemplates();
+    for(int index = 0; index < params.length; index++) {
+      Element param = params[index];
+      ParameterTemplate template = templates[index];
+      if(!template.isDefault(param)) ID.get(template.caption, template.type);
+      param.setFileIndex();
+    }
   }
   
   public Info getInfo() {
@@ -152,8 +173,17 @@ public abstract class Element extends Serialization implements Cloneable {
 
   public void write() throws IOException {
     ParameterTemplate[] templates = getTemplates();
-    for(int index = 0; index < templates.length; index++)
-      templates[index].write(params[index]);
+    int count = 0;
+    for(int index = 0; index < templates.length; index++) {
+      if(!templates[index].isDefault(params[index])) count++;
+    }
+    writeInt(count);
+    for(int index = 0; index < templates.length; index++) {
+      Element param = params[index];
+      ParameterTemplate template = templates[index];
+      if(!template.isDefault(param))
+        template.write(param);
+    }
   }
 
   public void writeDouble() throws IOException {

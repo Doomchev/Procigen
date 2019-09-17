@@ -12,8 +12,8 @@ public class Bitmap extends Element {
   
   static {
     ParameterTemplate[] templates = new ParameterTemplate[3];
-    templates[NAME] = new ParameterTemplate("Bitmap");
-    templates[COMPOSITIONS] = new ParameterTemplate();
+    templates[NAME] = new ParameterTemplate("Bitmap", true);
+    templates[COMPOSITIONS] = new ParameterTemplate("Compositions");
     templates[PALETTE] = new ParameterTemplate("Palette"
         , Options.getPalettes(), true);
     parameterTemplates.put(Bitmap.class, templates);

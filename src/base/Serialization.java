@@ -32,8 +32,15 @@ public class Serialization extends Main {
   public static int elementsQuantity;
   public static Element[] allElements;
   public static final HashMap<Class, Info> infos = new HashMap<>();
+  public static String[] ids;
+  public static int[] types;
   //public static final HashMap<String, Info>
 
+  public static class Type {
+    String id;
+    int type;
+  }
+  
   public static class Info {
     public final HashSet<Element> elementExists = new HashSet<>();
     public final LinkedList<Element> elements = new LinkedList<>();
@@ -77,85 +84,120 @@ public class Serialization extends Main {
       
       Version fileVersion = Version.read();
       
-      if(fileVersion.lessThan(new Version(0, 6, 2))) {
-        fill(CompositionArray.class, 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11);
-      }
-      if(fileVersion.lessThan(new Version(0, 6, 3))) {
-        fill(LinearAlteration.class, 0, 1, 3);
-        fill(SineAlteration.class, 0, 1, 3);
-        fill(ChainedLinearAlteration.class, 0, 1);
-        fill(ChainedSineAlteration.class, 0, 1, 3);
-      }
-      if(fileVersion.lessThan(new Version(0, 7, 1))) {
-        fill(ChainedLinearAlteration.class, 0, 1, 2);
-        fill(ChainedSineAlteration.class, 0, 1, 2, 3);
-      }
-      if(fileVersion.lessThan(new Version(0, 8))) {
-        fill(CompositionArray.class, 0, 1, 2, 3, 6, 7, 8, 9, 16, 17, 18, 19);
-        fill(SingleComposition.class, 0, 1, 2, 3, 6, 7, 8, 9, 16, 17);
-      }
-      
-      for(Entry<Class, Mapping> entry : mappings.entrySet()) {
-        Class elementClass = entry.getKey();
-        Mapping mapping = entry.getValue();
-        int[] params = mapping.maps;
-        int quantity = params.length;
-        ParameterTemplate[] newTemplates = parameterTemplates.get(elementClass);
-        ParameterTemplate[] templates = new ParameterTemplate[quantity];
-        for(int index = 0; index < params.length; index++) {
-          int mapIndex = params[index];
-          if(mapIndex >= newTemplates.length) {
-            System.err.println(elementClass.getSimpleName() + " < " + mapIndex);
-          } else if(mapIndex >= 0) {
-            templates[index] = newTemplates[mapIndex];
-          } else {
-            templates[index] = new ParameterTemplate(mapIndex);
+      if(!fileVersion.lessThan(new Version(0, 9))) {
+        ID.clear();
+        int idsQuantity = readInt();
+        types = new int[idsQuantity];
+        ids = new String[idsQuantity];
+        for(int index = 0; index < idsQuantity; index++) {
+          ids[index] = readString();
+          types[index] = readInt();
+        }
+        
+        elementsQuantity = readInt();
+        allElements = new Element[elementsQuantity];
+        int classesQuantity = readInt();
+        int elementIndex = 0;
+        for(int index = 0; index < classesQuantity; index++) {
+          Class elementClass = Class.forName(readString());
+          int classInstancesQuantity = readInt();
+          for(int index2 = 0; index2 < classInstancesQuantity; index2++) {
+            allElements[elementIndex] = (Element) elementClass.newInstance();
+            elementIndex++;
+          }
+          if(isProject) {
+            if(elementClass == Project.class)
+              Project.instance = (Project) allElements[elementIndex - 1];
+          } else if(elementClass == Options.class) {
+            Options.instance = (Options) allElements[elementIndex - 1];
           }
         }
-        mapping.templates = templates;
+        
+        for(int index = 0; index < elementsQuantity; index++)
+          allElements[index].read(true);
+        
+        return;
+      } else {
+
+        if(fileVersion.lessThan(new Version(0, 6, 2))) {
+          fill(CompositionArray.class, 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11);
+        }
+        if(fileVersion.lessThan(new Version(0, 6, 3))) {
+          fill(LinearAlteration.class, 0, 1, 3);
+          fill(SineAlteration.class, 0, 1, 3);
+          fill(ChainedLinearAlteration.class, 0, 1);
+          fill(ChainedSineAlteration.class, 0, 1, 3);
+        }
+        if(fileVersion.lessThan(new Version(0, 7, 1))) {
+          fill(ChainedLinearAlteration.class, 0, 1, 2);
+          fill(ChainedSineAlteration.class, 0, 1, 2, 3);
+        }
+        if(fileVersion.lessThan(new Version(0, 8))) {
+          fill(CompositionArray.class, 0, 1, 2, 3, 6, 7, 8, 9, 16, 17, 18, 19);
+          fill(SingleComposition.class, 0, 1, 2, 3, 6, 7, 8, 9, 16, 17);
+        }
+
+        for(Entry<Class, Mapping> entry : mappings.entrySet()) {
+          Class elementClass = entry.getKey();
+          Mapping mapping = entry.getValue();
+          int[] params = mapping.maps;
+          int quantity = params.length;
+          ParameterTemplate[] newTemplates = parameterTemplates.get(elementClass);
+          ParameterTemplate[] templates = new ParameterTemplate[quantity];
+          for(int index = 0; index < params.length; index++) {
+            int mapIndex = params[index];
+            if(mapIndex >= newTemplates.length) {
+              System.err.println(elementClass.getSimpleName() + " < " + mapIndex);
+            } else if(mapIndex >= 0) {
+              templates[index] = newTemplates[mapIndex];
+            } else {
+              templates[index] = new ParameterTemplate(mapIndex);
+            }
+          }
+          mapping.templates = templates;
+        }
+
+        elementsQuantity = readInt();
+        allElements = new Element[elementsQuantity];
+        int classesQuantity = readInt();
+        int elementIndex = 0;
+        for(int index = 0; index < classesQuantity; index++) {
+          Class elementClass = Class.forName(readString());
+          int classInstancesQuantity = readInt();
+          for(int index2 = 0; index2 < classInstancesQuantity; index2++) {
+            allElements[elementIndex] = (Element) elementClass.newInstance();
+            elementIndex++;
+          }
+          if(isProject) {
+            if(elementClass == Project.class)
+              Project.instance = (Project) allElements[elementIndex - 1];
+          } else if(elementClass == Options.class) {
+            Options.instance = (Options) allElements[elementIndex - 1];
+          }
+        }
+        for(int index = 0; index < elementsQuantity; index++) {
+          Element element = allElements[index];
+          element.read(false);
+          Mapping mapping = mappings.get(element.getClass());
+          if(mapping != null) {
+            int[] map = mapping.maps;
+            ParameterTemplate[] newTemplates = parameterTemplates.get(
+                element.getClass());
+            Element[] params = new Element[newTemplates.length];
+            for(int index2 = 0; index2 < map.length; index2++) {
+              int mapIndex = map[index2];
+              if(mapIndex >= 0) params[mapIndex] = element.params[index2];
+            }
+            for(int index2 = 0; index2 < params.length; index2++) {
+              if(params[index2] == null)
+                params[index2] = newTemplates[index2].createParameter();
+            }
+            element.params = params;
+          }
+        }
+        mappings.clear();
       }
       
-      elementsQuantity = readInt();
-      allElements = new Element[elementsQuantity];
-      int classesQuantity = readInt();
-      int elementIndex = 0;
-      for(int index = 0; index < classesQuantity; index++) {
-        Class elementClass = Class.forName(readString());
-        int classInstancesQuantity = readInt();
-        for(int index2 = 0; index2 < classInstancesQuantity; index2++) {
-          allElements[elementIndex] = (Element) elementClass.newInstance();
-          elementIndex++;
-        }
-        if(isProject) {
-          if(elementClass == Project.class)
-            Project.instance = (Project) allElements[elementIndex - 1];
-        } else if(elementClass == Options.class) {
-          Options.instance = (Options) allElements[elementIndex - 1];
-        }
-      }
-      for(int index = 0; index < elementsQuantity; index++) {
-        Element element = allElements[index];
-        System.out.println(element.getClass().getSimpleName());
-        element.read();
-        Mapping mapping = mappings.get(element.getClass());
-        if(mapping != null) {
-          int[] map = mapping.maps;
-          ParameterTemplate[] newTemplates = parameterTemplates.get(
-              element.getClass());
-          Element[] params = new Element[newTemplates.length];
-          for(int index2 = 0; index2 < map.length; index2++) {
-            int mapIndex = map[index2];
-            if(mapIndex >= 0) params[mapIndex] = element.params[index2];
-          }
-          for(int index2 = 0; index2 < params.length; index2++) {
-            if(params[index2] == null)
-              params[index2] = newTemplates[index2].createParameter();
-          }
-          element.params = params;
-        }
-      }
-      
-      mappings.clear();
       reader.close();      
     } catch (FileNotFoundException ex) {
       System.out.println(ex.toString());
@@ -169,9 +211,18 @@ public class Serialization extends Main {
     try {
       writer = new DataOutputStream(new FileOutputStream(file));
       currentVersion.write();
+      
       infos.clear();
+      ID.clear();
       elementsQuantity = 0;
       parent.setFileIndex();
+      
+      writeInt(ID.list.size());
+      for(ID.Type type : ID.list) {
+        writeString(type.id);
+        writeInt(type.type);
+      }
+      
       int delta = 0;
       writeInt(elementsQuantity);
       writeInt(infos.size());

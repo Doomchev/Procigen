@@ -11,8 +11,8 @@ public abstract class Composition extends Element {
   public static final int NAME = 0, TRANSFORMATIONS = 1;
   
   public static void setTemplates(ParameterTemplate[] templates, String name) {
-    templates[NAME] = new ParameterTemplate(name);
-    templates[TRANSFORMATIONS] = new ParameterTemplate();
+    templates[NAME] = new ParameterTemplate(name, true);
+    templates[TRANSFORMATIONS] = new ParameterTemplate("Transformations");
   }
   
   @Override

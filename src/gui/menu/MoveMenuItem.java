@@ -1,6 +1,7 @@
 package gui.menu;
 
 import base.Main;
+import base.Render;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
 import structure.Element;
@@ -21,11 +22,11 @@ public class MoveMenuItem extends MenuItem {
     LinkedList<Element> list = parent.getList();
     int elementIndex = list.indexOf(element) + direction;
     if(elementIndex < 0 || elementIndex >= list.size()) return;
-    Main.stopRender();
+    Render.stop();
     list.remove(element);
     list.add(elementIndex, element);
     Main.updateProject();
-    Main.startRender();
+    Render.start();
   }
 
 }

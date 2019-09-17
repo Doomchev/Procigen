@@ -1,5 +1,6 @@
 package parameters;
 
+import base.ID;
 import base.Serialization;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -9,11 +10,12 @@ public class ParameterTemplate extends Serialization {
   public static final int DOUBLE = 0, ELEMENT = 1, ENUM = 2, LIST = 3
       , STRING = 4, NEW_ELEMENT = 5;
   
-  public int type;
+  public int type, id;
   public String caption;
   public double initialValue, min = 0.0, max = 0.0, step = 0;
   public LinkedList<Element> elements = null;
   public String[] values = null;
+  public boolean hidden = false;
 
   public ParameterTemplate(String caption, double initialValue, double min
       , double max, double step) {
@@ -54,14 +56,16 @@ public class ParameterTemplate extends Serialization {
     this.type = -1 - type;
   }
   
-  public ParameterTemplate() {
-    this.caption = "";
+  public ParameterTemplate(String caption) {
+    this.caption = caption;
+    this.hidden = true;
     this.type = LIST;
   }
   
-  public ParameterTemplate(String value) {
+  public ParameterTemplate(String value, boolean hidden) {
     this.caption = value;
     this.type = STRING;
+    this.hidden = hidden;
   }
 
   public Element createParameter() {
@@ -71,7 +75,7 @@ public class ParameterTemplate extends Serialization {
       case ELEMENT:
         return new ElementValue(elements.getFirst());
       case NEW_ELEMENT:
-        return new ElementValue(elements.getFirst());
+        return new ElementValue(elements.getFirst().createNew());
       case ENUM:
         return new EnumValue(0);
       case LIST:
@@ -81,6 +85,23 @@ public class ParameterTemplate extends Serialization {
     }
     System.err.println("Wrong parameter template "  + type);
     return null;
+  }
+  
+  public boolean isDefault(Element element) {
+    switch(type) {
+      case DOUBLE:
+        return element.getDouble() == initialValue;
+      case ELEMENT:
+        return element.getElement() == elements.getFirst();
+      case ENUM:
+        return element.getValue() == 0;
+      case LIST:
+        return element.getList().isEmpty();
+      case STRING:
+        return element.getName().equals(caption);
+      default:
+        return false;
+    }
   }
 
   public String getText(Element element, int parameterIndex) {
@@ -123,7 +144,25 @@ public class ParameterTemplate extends Serialization {
     return null;
   }
 
+  public static void readValue(int type) throws IOException {
+    switch(type) {
+      case DOUBLE:
+        if(readInt() == 0)
+          reader.readDouble();
+        else
+          readInt();
+      case LIST:
+        int quantity = readInt();
+        for(int index = 0; index < quantity; index++) readInt();
+      case STRING:
+        readString();
+      default:
+        readInt();
+    }
+  }
+
   public void write(Element param) throws IOException {
+    writeInt(ID.get(caption, type).number);
     if(type == DOUBLE) {
       param.writeDouble();
     } else {

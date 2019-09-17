@@ -25,7 +25,7 @@ public class Render512 {
       Main.frame.setVisible(true);
       Serialization.load(new File("configuration.bin"), false);
       Serialization.load(chooser.getSelectedFile(), true);
-      Main.renderToImages(512, 512, true);
+      Render.renderToImages(512, 512, true);
       Main.frame.dispose();
     }
   }

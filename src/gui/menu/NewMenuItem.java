@@ -2,6 +2,7 @@ package gui.menu;
 
 import base.Main;
 import static base.Main.refresh;
+import base.Render;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
 import structure.Element;
@@ -28,7 +29,7 @@ public class NewMenuItem extends MenuItem {
     try {
       Element element = (Element) elementClass.newInstance();
       element.init();
-      Main.stopRender();
+      Render.stop();
       LinkedList<Element> list = parent.getList();
       if(afterElement == null) {
         list.addFirst(element);
@@ -36,7 +37,7 @@ public class NewMenuItem extends MenuItem {
         list.add(list.indexOf(afterElement) + 1, element);
       }
       refresh();
-      Main.startRender();
+      Render.start();
     } catch (InstantiationException | IllegalAccessException ex) {
     }
   }
