@@ -27,15 +27,15 @@ public abstract class Element extends Serialization implements Cloneable {
   public void setTemplate(ParameterTemplate template) {
   }
   
-  public double getDouble() {
+  public double getDouble(RenderingBitmap bitmap) {
     return 0.0;
   }
   
   public void setDouble(double value) {
   }
 
-  public int getInt() {
-    return (int) Math.round(getDouble());
+  public int getInt(RenderingBitmap bitmap) {
+    return (int) Math.round(getDouble(bitmap));
   }
   
   public Element getElement() {
@@ -43,6 +43,14 @@ public abstract class Element extends Serialization implements Cloneable {
   }
   
   public int getValue() {
+    return 0;
+  }
+
+  public boolean isValue() {
+    return false;
+  }
+  
+  public double getRnd(int increment) {
     return 0;
   }
 
@@ -66,8 +74,6 @@ public abstract class Element extends Serialization implements Cloneable {
   }
   
   public ParameterTemplate[] getTemplates() {
-    Mapping mapping = Serialization.mappings.get(getClass());
-    if(mapping != null) return mapping.templates;
     return parameterTemplates.get(getClass());
   }
 
@@ -78,10 +84,7 @@ public abstract class Element extends Serialization implements Cloneable {
   public void draw(Graphics g, int x, int y, int scrollY, int height) {
   }
 
-  public void renderColors(RenderingBitmap bitmap) {
-  }
-
-  public void renderCoords(RenderingBitmap bitmap) {
+  public void render(RenderingBitmap bitmap) {
   }
 
   public void applyTransformation(RenderingBitmap bitmap) {
@@ -119,31 +122,12 @@ public abstract class Element extends Serialization implements Cloneable {
     }
     return y0;
   }
+  
+  public boolean isStandard() {
+    return true;
+  }
 
-  public void read(boolean newFormat) throws IOException {
-    ParameterTemplate[] templates = getTemplates();
-    params = new Element[templates.length];
-    if(newFormat) {
-      int fieldsQuantity = readInt();
-      for(int index = 0; index < fieldsQuantity; index++) {
-        int idIndex = readInt();
-        String id = ids[idIndex];
-        for(int index2 = 0; index2 < templates.length; index2++) {
-          ParameterTemplate template = templates[index2];
-          if(template.caption.equals(id)) {
-            params[index2] = template.read();
-            break;
-          } else if(index2 == templates.length - 1)
-            ParameterTemplate.readValue(types[idIndex]);
-        }
-      }
-      for(int index = 0; index < templates.length; index++)
-        if(params[index] == null)
-          params[index] = templates[index].createParameter();
-    } else {
-      for(int index = 0; index < templates.length; index++)
-        params[index] = templates[index].read();
-    }
+  public void read() throws IOException {
   }
 
   public void setFileIndex() {

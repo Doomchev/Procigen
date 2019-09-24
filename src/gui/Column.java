@@ -44,15 +44,16 @@ public class Column extends GUIContainer {
     return y0 + blockHeight;
   }
 
-  public int addList(Element element, LinkedList<Element> list, int x0, int y0) {
-    addBlock(element, x0, y0, element);
+  public int addList(Element element, Element parent, LinkedList<Element> list
+      , int x0, int y0) {
+    addBlock(element, x0, y0, parent);
     x0 += blockIndent;
     y0 += blockHeight;
     for(Element item: list) y0 = item.update(x0 + blockIndent, y0, element);
     return y0;
   }
   
-  public int addList(Element element, int x0, int y0) {
-    return addList(element, element.getList(), x0, y0);
+  public int addList(Element element, Element parent, int x0, int y0) {
+    return addList(element, parent, element.getList(), x0, y0);
   }
 }

@@ -24,9 +24,12 @@ public class AlterationMenuItem extends MenuItem {
   public void actionPerformed(ActionEvent e) {
     Element newValue = value.createNew();
     newValue.setTemplate(template);
-    Render.stop();
-    element.params[parameterIndex] = newValue;
-    Main.updateProperties();
-    Render.start();
+    Main.changesThread = new Thread() {
+      @Override
+      public void run() {
+        element.params[parameterIndex] = newValue;
+        Main.updateProperties();
+      }
+    };
   }
 }

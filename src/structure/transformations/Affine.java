@@ -13,7 +13,7 @@ public class Affine extends Transformation {
     templates[DX] = new ParameterTemplate("DX", 0.0);
     templates[DY] = new ParameterTemplate("DY", 0.0);
     templates[XSCALE] = new ParameterTemplate("XScale", 1.0);
-    templates[YSCALE] = new ParameterTemplate("XScale", 1.0);
+    templates[YSCALE] = new ParameterTemplate("YScale", 1.0);
     templates[ANGLE] = new ParameterTemplate("Angle", 0.0);
     parameterTemplates.put(Affine.class, templates);
   }
@@ -21,9 +21,9 @@ public class Affine extends Transformation {
   @Override
   public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
-    apply(bitmap, params[DX].getDouble(), params[DY].getDouble()
-        , params[XSCALE].getDouble(), params[YSCALE].getDouble()
-        , params[ANGLE].getDouble());
+    apply(bitmap, params[DX].getDouble(bitmap), params[DY].getDouble(bitmap)
+        , params[XSCALE].getDouble(bitmap), params[YSCALE].getDouble(bitmap)
+        , params[ANGLE].getDouble(bitmap));
   }
   
   public static void apply(RenderingBitmap bitmap, double dx, double dy

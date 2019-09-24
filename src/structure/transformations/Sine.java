@@ -24,12 +24,12 @@ public class Sine extends Transformation {
   @Override
   public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
-    double hSize = params[H_SIZE].getDouble();
-    double hAmplitude = 1.0 / params[H_AMPLITUDE].getDouble();
-    double hShift = params[H_SHIFT].getDouble();
-    double vSize = params[V_SIZE].getDouble();
-    double vAmplitude = 1.0 / params[V_AMPLITUDE].getDouble();
-    double vShift = params[V_SHIFT].getDouble();
+    double hSize = params[H_SIZE].getDouble(bitmap);
+    double hAmplitude = 1.0 / params[H_AMPLITUDE].getDouble(bitmap);
+    double hShift = params[H_SHIFT].getDouble(bitmap);
+    double vSize = params[V_SIZE].getDouble(bitmap);
+    double vAmplitude = 1.0 / params[V_AMPLITUDE].getDouble(bitmap);
+    double vShift = params[V_SHIFT].getDouble(bitmap);
     double[] coords = bitmap.coords;
     for(int index = 0; index < bitmap.size2; index += 2) {
       coords[index] += Math.sin((coords[index + 1] * hSize + hShift) * PI2)

@@ -16,9 +16,9 @@ import structure.Project;
 import structure.alterations.ChainedLinearAlteration;
 import structure.alterations.ChainedSineAlteration;
 import structure.alterations.LinearAlteration;
+import structure.alterations.RandomAlteration;
 import structure.alterations.SineAlteration;
 import structure.compositions.CompositionArray;
-import structure.compositions.SingleComposition;
 import structure.patterns.Beam;
 import structure.patterns.Gradient;
 import structure.transformations.Affine;
@@ -66,7 +66,6 @@ public class Templates {
     addNew(patternTypes, new Gradient());
     addNew(patternTypes, new Beam());
 
-    addNew(compositionTypes, new SingleComposition());
     addNew(compositionTypes, new CompositionArray());
 
     addNew(transformationTypes, new Affine());
@@ -82,13 +81,16 @@ public class Templates {
     addNew(alterations, new SineAlteration());
     addNew(alterations, new ChainedLinearAlteration());
     addNew(alterations, new ChainedSineAlteration());
+    addNew(alterations, new RandomAlteration());
 
     Serialization.load(new File("configuration.bin"), false);
     
     Project.instance = new Project();
     Project.instance.init();
     Bitmap bitmap = new Bitmap();
-    addNew(Project.instance, Project.ELEMENTS, bitmap);
-    addNew(bitmap, Bitmap.COMPOSITIONS, new CompositionArray());
+    CompositionArray compositionArray = new CompositionArray();
+    addNew(Project.instance, Project.BITMAPS, bitmap);
+    addNew(bitmap, Bitmap.COMPOSITIONS, compositionArray);
+    addNew(compositionArray, CompositionArray.PATTERNS, new Beam());
   }
 }

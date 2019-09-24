@@ -139,8 +139,12 @@ public final class Palette extends Element {
     return palette;
   }
   
+  public boolean isStandard() {
+    return false;
+  }
+  
   @Override
-  public void read(boolean newFormat) throws IOException {
+  public void read() throws IOException {
     name = readString();
     int colorsQuantity = readInt();
     colors = new Col[colorsQuantity];

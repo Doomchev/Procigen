@@ -16,7 +16,7 @@ public class Swirl extends Transformation {
   @Override
   public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
-    double multiplier = params[MULTIPLIER].getDouble();
+    double multiplier = params[MULTIPLIER].getDouble(bitmap);
     double[] coords = bitmap.coords;
     for(int index = 0; index < bitmap.size2; index += 2) {
       double x = coords[index];

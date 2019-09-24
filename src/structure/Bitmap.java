@@ -26,7 +26,7 @@ public class Bitmap extends Element {
   
   @Override
   public int update(int x0, int y0, Element parent) {
-    return elementsColumn.addList(this, x0, y0);
+    return elementsColumn.addList(this, parent, x0, y0);
   }
 
   @Override
@@ -40,11 +40,12 @@ public class Bitmap extends Element {
   }
   
   @Override
-  public void renderColors(RenderingBitmap bitmap) {
+  public void render(RenderingBitmap bitmap) {
     if(hide) return;
+    emptyBitmap.copyParametersTo(bitmap);
     for(int index = 0; index < bitmap.size; index++) bitmap.pixels[index] = 0;
     for(Element composition : params[COMPOSITIONS].getList())
-      composition.renderCoords(bitmap);
+      composition.render(bitmap);
     params[PALETTE].getPalette().render(bitmap);
   }
 }

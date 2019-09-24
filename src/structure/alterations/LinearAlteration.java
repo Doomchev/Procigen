@@ -1,5 +1,6 @@
 package structure.alterations;
 
+import base.RenderingBitmap;
 import parameters.ParameterTemplate;
 
 public class LinearAlteration extends Alteration {
@@ -21,14 +22,14 @@ public class LinearAlteration extends Alteration {
     this.template = template;
   }
 
-  public double getK() {
-    double part = params[N_PART].getDouble();
-    return part * nValue / quantityValue + getTime() * (1.0 - part);
+  public double getK(RenderingBitmap bitmap) {
+    double part = params[N_PART].getDouble(bitmap);
+    return part * bitmap.n / bitmap.quantity + getTime(bitmap) * (1.0 - part);
   }
 
   @Override
-  public double getDouble() {
-    double start = params[START].getDouble();
-    return start + (params[END].getDouble() - start) * getK();
+  public double getDouble(RenderingBitmap bitmap) {
+    double start = params[START].getDouble(bitmap);
+    return start + (params[END].getDouble(bitmap) - start) * getK(bitmap);
   }  
 }

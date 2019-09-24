@@ -23,8 +23,7 @@ public class EnumValue extends Element {
   }
   
   @Override
-  public void menu(ParameterTemplate template, int x0
-      , int y0) {
+  public void menu(ParameterTemplate template, int x0, int y0) {
     String[] values = template.values;
     for(int index = 0; index < values.length; index++)
       (new EnumValueMenuItem(values[index], this, index)).addTo(currentMenu);

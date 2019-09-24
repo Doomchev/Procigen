@@ -1,5 +1,6 @@
 package structure.alterations;
 
+import base.RenderingBitmap;
 import parameters.ParameterTemplate;
 
 public class ChainedSineAlteration extends Alteration {
@@ -14,12 +15,14 @@ public class ChainedSineAlteration extends Alteration {
   }
 
   @Override
-  public double getDouble() {
-    double start = params[START].getDouble();
-    int n = (nValue + params[N_SHIFT].getInt()) % quantityValue;
-    double angle = 1.0 * (timeValue + n) / quantityValue + params[SHIFT].getDouble();
+  public double getDouble(RenderingBitmap bitmap) {
+    double start = params[START].getDouble(bitmap);
+    int n = (bitmap.n + params[N_SHIFT].getInt(bitmap)) % bitmap.quantity;
+    double angle = 1.0 * (getTime(bitmap) + n) / bitmap.quantity
+        + params[SHIFT].getDouble(bitmap);
     angle = angle - Math.floor(angle);
-    double k = (1.0 - Math.cos(angle * PI2 * params[MULTIPLIER].getDouble())) * 0.5;
-    return start + (params[END].getDouble() - start) * k;
+    double k = (1.0 - Math.cos(angle * PI2
+        * params[MULTIPLIER].getDouble(bitmap))) * 0.5;
+    return start + (params[END].getDouble(bitmap) - start) * k;
   }  
 }

@@ -17,7 +17,7 @@ public class LoopSector extends Transformation {
   @Override
   public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
-    double sectorSize = PI2 / params[SECTOR_SIZE].getDouble();
+    double sectorSize = PI2 / params[SECTOR_SIZE].getDouble(bitmap);
     double k = 1.0 / sectorSize;
     double dAngle = 0.5 * sectorSize;
     double dAngle2 = dAngle + (params[TYPE].getValue() == VERTICAL ? 0.25 * PI2

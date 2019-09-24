@@ -8,7 +8,7 @@ import structure.Element;
 
 public class ParameterTemplate extends Serialization {
   public static final int DOUBLE = 0, ELEMENT = 1, ENUM = 2, LIST = 3
-      , STRING = 4, NEW_ELEMENT = 5;
+      , STRING = 4, NEW_ELEMENT = 5, SEED = 6;
   
   public int type, id;
   public String caption;
@@ -51,9 +51,9 @@ public class ParameterTemplate extends Serialization {
     this.type = ENUM;
   }
   
-  public ParameterTemplate(int type) {
-    this.caption = "";
-    this.type = -1 - type;
+  public ParameterTemplate(int type, String caption) {
+    this.caption = caption;
+    this.type = type;
   }
   
   public ParameterTemplate(String caption) {
@@ -62,8 +62,8 @@ public class ParameterTemplate extends Serialization {
     this.type = LIST;
   }
   
-  public ParameterTemplate(String value, boolean hidden) {
-    this.caption = value;
+  public ParameterTemplate(String caption, boolean hidden) {
+    this.caption = caption;
     this.type = STRING;
     this.hidden = hidden;
   }
@@ -82,6 +82,8 @@ public class ParameterTemplate extends Serialization {
         return new ListValue();
       case STRING:
         return new StringValue(caption);
+      case SEED:
+        return new SeedValue();
     }
     System.err.println("Wrong parameter template "  + type);
     return null;
@@ -90,7 +92,7 @@ public class ParameterTemplate extends Serialization {
   public boolean isDefault(Element element) {
     switch(type) {
       case DOUBLE:
-        return element.getDouble() == initialValue;
+        return element.isValue() && element.getDouble(emptyBitmap) == initialValue;
       case ELEMENT:
         return element.getElement() == elements.getFirst();
       case ENUM:
@@ -120,11 +122,16 @@ public class ParameterTemplate extends Serialization {
   }
 
   public Element read() throws IOException {
+    Element value = readValue(type);
+    value.setTemplate(this);
+    return value;
+  }
+
+  public static Element readValue(int type) throws IOException {
     switch(type) {
       case DOUBLE:
         if(readInt() == 0) return new DoubleValue(reader.readDouble());
         Element element = allElements[readInt()];
-        element.setTemplate(this);
         return element;
       case ELEMENT:
       case NEW_ELEMENT:
@@ -139,26 +146,11 @@ public class ParameterTemplate extends Serialization {
         return value;
       case STRING:
         return new StringValue(readString());
+      case SEED:
+        return new SeedValue(reader.readLong());
     }
     System.err.println("Wrong parameter template.");
     return null;
-  }
-
-  public static void readValue(int type) throws IOException {
-    switch(type) {
-      case DOUBLE:
-        if(readInt() == 0)
-          reader.readDouble();
-        else
-          readInt();
-      case LIST:
-        int quantity = readInt();
-        for(int index = 0; index < quantity; index++) readInt();
-      case STRING:
-        readString();
-      default:
-        readInt();
-    }
   }
 
   public void write(Element param) throws IOException {

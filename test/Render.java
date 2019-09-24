@@ -1,5 +1,4 @@
 
-import static base.Main.canvas;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

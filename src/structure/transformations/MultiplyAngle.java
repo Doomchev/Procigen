@@ -16,7 +16,7 @@ public class MultiplyAngle extends Transformation {
   @Override
   public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
-    double sectorSize = params[MULTIPLIER].getDouble();
+    double sectorSize = params[MULTIPLIER].getDouble(bitmap);
     double[] coords = bitmap.coords;
     for(int index = 0; index < bitmap.size2; index += 2) {
       double x = coords[index];

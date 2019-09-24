@@ -40,7 +40,7 @@ public class PropertyBlock extends ElementBlock {
       if(template.type != ParameterTemplate.DOUBLE) return;
       Main.selectedPalette = null;
       selectedProperty = this;
-      scalePos = param.getDouble();
+      scalePos = param.getDouble(null);
       propertiesPanel.repaint();
     }
     scalePanel.repaint();

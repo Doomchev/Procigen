@@ -1,6 +1,5 @@
 package base;
 
-import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,42 +10,36 @@ import structure.Project;
 
 public class Render extends Main {
   public static void start() {
-    if(threads[0] != null) return;
-    EventQueue.invokeLater(() -> {
-      threads[0] = new Thread() {
-        @Override
-        public void run() {
-          while(true) {
-            timeValue = 0.001 * (System.currentTimeMillis() - startingTime)
-                / Project.instance.params[Project.DURATION].getDouble();
-            timeValue = timeValue - Math.floor(timeValue);
-            try {
-              latch = new CountDownLatch(threadsQuantity);
-              int y = 0;
-              for(int index = 0; index < threadsQuantity; index++) {
-                threads[index + 1] = new RenderThread(images[index], 0, y, index);
-                threads[index + 1].start();
-                y += images[index].getHeight();
-              }
-              latch.await();
-              repaintLatch = new CountDownLatch(1);
-              renderPanel.repaint();
-              repaintLatch.await();
-            } catch (InterruptedException ex) {
-              return;
+    Thread render = new Thread() {
+      @Override
+      public void run() {
+        while(true) {
+          timeValue = 0.001 * (System.currentTimeMillis() - startingTime)
+              / Project.instance.params[Project.DURATION].getDouble(null);
+          timeValue = timeValue - Math.floor(timeValue);
+          try {
+            latch = new CountDownLatch(threadsQuantity);
+            int y = 0;
+            for(int index = 0; index < threadsQuantity; index++) {
+              new RenderThread(images[index], 0, y, index).start();
+              y += images[index].getHeight();
             }
+            latch.await();
+            repaintLatch = new CountDownLatch(1);
+            renderPanel.repaint();
+            repaintLatch.await();
+          } catch (InterruptedException ex) {
+            return;
+          }
+          if(changesThread != null) {
+            changesThread.start();
+            while(changesThread.isAlive()) yield();
+            changesThread = null;
           }
         }
-      };
-      threads[0].start();
-    });
-  }
-
-  public static void stop() {
-    if(threads[0] == null) return;
-    for(Thread thread : threads)
-      if(thread != null) thread.interrupt();
-    threads[0] = null;
+      }
+    };
+    render.start();
   }
 
   public static void renderToImages(int width, int height, boolean video) {
@@ -56,7 +49,7 @@ public class Render extends Main {
     BufferedImage image = new BufferedImage(width, height
         , BufferedImage.TYPE_INT_ARGB);
     int quantity = (int) Math.ceil(30.0
-        * Project.instance.params[Project.DURATION].getDouble());
+        * Project.instance.params[Project.DURATION].getDouble(null));
     long start = System.currentTimeMillis();
     frame.setTitle("Starting...");
     for(int num = 0; num < quantity; num++) {
@@ -68,8 +61,7 @@ public class Render extends Main {
         int y = 0;
         for(int index = 0; index < threadsQuantity; index++) {
           //Project.instance.render(index);
-          threads[index + 1] = new RenderThread(images[index], 0, y, index);
-          threads[index + 1].start();
+          new RenderThread(images[index], 0, y, index).start();
           y += images[index].getHeight();
         }
         latch.await();

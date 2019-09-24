@@ -1,5 +1,6 @@
 package gui.menu;
 
+import base.Main;
 import static base.Main.selectedElement;
 import static base.Main.updateProject;
 import static base.Main.updateProperties;
@@ -40,7 +41,7 @@ public class FileMenuItem extends MenuItem {
     chooser.setFileFilter(new FileFilter() {
       @Override
       public boolean accept(File file) {
-        return file.getName().endsWith(".pgi");
+        return file.isDirectory() || file.getName().endsWith(".pgi");
       }
 
       @Override
@@ -51,13 +52,16 @@ public class FileMenuItem extends MenuItem {
     switch(operation) {
       case OPEN:
         if(chooser.showDialog(null, "Select file to open") == APPROVE_OPTION) {
-          Serialization.load(chooser.getSelectedFile(), true);
-          Render.stop();
-          Project.instance.init();
-          updateProject();
-          selectedElement = null;
-          updateProperties();
-          Render.start();
+          Main.changesThread = new Thread() {
+            @Override
+            public void run() {
+              Serialization.load(chooser.getSelectedFile(), true);
+              Project.instance.init();
+              updateProject();
+              selectedElement = null;
+              updateProperties();
+            }
+          };
         }
         break;
       case SAVE_AS:

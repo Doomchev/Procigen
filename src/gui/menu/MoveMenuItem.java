@@ -22,11 +22,14 @@ public class MoveMenuItem extends MenuItem {
     LinkedList<Element> list = parent.getList();
     int elementIndex = list.indexOf(element) + direction;
     if(elementIndex < 0 || elementIndex >= list.size()) return;
-    Render.stop();
-    list.remove(element);
-    list.add(elementIndex, element);
-    Main.updateProject();
-    Render.start();
+    Main.changesThread = new Thread() {
+      @Override
+      public void run() {
+        list.remove(element);
+        list.add(elementIndex, element);
+        Main.updateProject();
+      }
+    };
   }
 
 }

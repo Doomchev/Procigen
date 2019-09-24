@@ -19,8 +19,8 @@ public class MoveToVector extends Transformation {
   @Override
   public void applyTransformation(RenderingBitmap bitmap) {
     if(hide) return;
-    double radius = params[RADIUS].getDouble();
-    double angle = PI2 * params[ANGLE].getDouble();
+    double radius = params[RADIUS].getDouble(bitmap);
+    double angle = PI2 * params[ANGLE].getDouble(bitmap);
     double dx = Math.cos(angle) * radius;
     double dy = Math.sin(angle) * radius;
     double[] coords = bitmap.coords;

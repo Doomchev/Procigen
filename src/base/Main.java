@@ -24,7 +24,7 @@ import structure.Palette.Col;
 import structure.Project;
 
 public class Main {
-  public static final Version currentVersion = new Version(0, 9);
+  public static final Version currentVersion = new Version(0, 10);
   public static final double PI2 = Math.PI * 2.0;
   public static final int elementsColumnWidth = 200, propertiesColumnWidth = 200
       , scaleBarHeight = 60, blockHeight = 20, blockIndent = 5, colorWidth = 32;
@@ -35,10 +35,11 @@ public class Main {
   public static final BufferedImage[] images = new BufferedImage[threadsQuantity];
 
   public static int detalization = 4, renderWidth, renderHeight, scaleBarWidth
-      , mouseStartingPos, nValue, quantityValue, imageWidth, imageHeight;
+      , mouseStartingPos, imageWidth, imageHeight;
   public static double scaleScale = 50.0, scalePos = 0.0, scaleStartingPos
-      , markStep, timeValue, cMultiplication, cIncrement;
+      , markStep, timeValue;
   public static long startingTime = System.currentTimeMillis();
+  public static RenderingBitmap emptyBitmap = new RenderingBitmap(0, 0);
   
   public static Column elementsColumn = new Column(), propertiesColumn = new Column();
   
@@ -50,7 +51,7 @@ public class Main {
       = new HashMap<>();
   
   public static CountDownLatch latch, repaintLatch;
-  public static final Thread[] threads = new Thread[threadsQuantity + 1];
+  public static Thread changesThread = null;
   
   public static double compositionIndex;
   public static Font scaleFont = new Font("Arial", Font.PLAIN, 10);
@@ -139,8 +140,8 @@ public class Main {
   
   public static void updateProject() {
     elementsColumn.clear();
-    int y = elementsColumn.addList(Project.instance, 0, 0);
-    elementsColumn.addList(Options.instance, 0, y);
+    int y = elementsColumn.addList(Project.instance, null, 0, 0);
+    elementsColumn.addList(Options.instance, null, 0, y);
     elementsPanel.repaint();
   }
   

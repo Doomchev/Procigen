@@ -13,9 +13,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import structure.Options;
 import structure.Palette;
 
 public class GUI extends Main {
@@ -24,7 +26,7 @@ public class GUI extends Main {
     frame.addWindowListener(new WindowAdapter(){
         @Override
         public void windowClosing(WindowEvent e){
-          //Serialization.save(new File("configuration.bin"), Options.instance);
+          Serialization.save(new File("configuration.bin"), Options.instance);
         }
     });
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -195,46 +197,49 @@ public class GUI extends Main {
       public void mousePressed(MouseEvent e) {
         if(mouseInsideScaleBar(e)) {
           if(selectedPalette != null) {
-            Render.stop();
-            if(e.getButton() == MouseEvent.BUTTON1) {
-              Palette.Col col = selectedColor(e.getX());
-              if(col == null) return;
-              Color color = JColorChooser.showDialog(frame, "Choose a color"
-                  , col.get());
-              if(color == null) return;
-              col.r = color.getRed();
-              col.g = color.getGreen();
-              col.b = color.getBlue();
-              scalePanel.repaint();
-            } else {
-              Palette.Col[] colors = selectedPalette.colors;
-              int length = colors.length;
-              int index = selectedColorIndex(e.getX());
-              Palette.Col[] newColors;
-              if(e.isControlDown()) {
-                newColors = new Palette.Col[length - 1];
-                if(index < 0) return;
-                if(index > 0) System.arraycopy(colors, 0, newColors, 0, index);
-                if(index < length - 1) System.arraycopy(colors, index + 1
-                    , newColors, index, length - index - 1);
-              } else {
-                newColors = new Palette.Col[length + 1];
-                Palette.Col newColor = new Palette.Col(255, 255, 255);
-                if(index < 0) {
-                  System.arraycopy(colors, 0, newColors, 0, length);
-                  newColors[length] = newColor;
+            changesThread = new Thread() {
+              @Override
+              public void run() {
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                  Palette.Col col = selectedColor(e.getX());
+                  if(col == null) return;
+                  Color color = JColorChooser.showDialog(frame, "Choose a color"
+                      , col.get());
+                  if(color == null) return;
+                  col.r = color.getRed();
+                  col.g = color.getGreen();
+                  col.b = color.getBlue();
+                  scalePanel.repaint();
                 } else {
-                  if(index > 0) System.arraycopy(colors, 0, newColors, 0, index);
-                  System.arraycopy(colors, index, newColors, index + 1, length
-                      - index);
-                  newColors[index] = newColor;
+                  Palette.Col[] colors = selectedPalette.colors;
+                  int length = colors.length;
+                  int index = selectedColorIndex(e.getX());
+                  Palette.Col[] newColors;
+                  if(e.isControlDown()) {
+                    newColors = new Palette.Col[length - 1];
+                    if(index < 0) return;
+                    if(index > 0) System.arraycopy(colors, 0, newColors, 0, index);
+                    if(index < length - 1) System.arraycopy(colors, index + 1
+                        , newColors, index, length - index - 1);
+                  } else {
+                    newColors = new Palette.Col[length + 1];
+                    Palette.Col newColor = new Palette.Col(255, 255, 255);
+                    if(index < 0) {
+                      System.arraycopy(colors, 0, newColors, 0, length);
+                      newColors[length] = newColor;
+                    } else {
+                      if(index > 0) System.arraycopy(colors, 0, newColors, 0, index);
+                      System.arraycopy(colors, index, newColors, index + 1, length
+                          - index);
+                      newColors[index] = newColor;
+                    }
+                  }
+                  selectedPalette.colors = newColors;
                 }
+                selectedPalette.init();
+                scalePanel.repaint();
               }
-              selectedPalette.colors = newColors;
-            }
-            selectedPalette.init();
-            scalePanel.repaint();
-            Render.start();
+            };
           } else if(selectedProperty != null) {
             mouseStartingPos = e.getX();
             scaleStartingPos = scalePos;
@@ -262,9 +267,12 @@ public class GUI extends Main {
           } else {
             color.size++;
           }
-          Render.stop();
-          selectedPalette.init();
-          Render.start();
+          changesThread = new Thread() {
+            @Override
+            public void run() {
+              selectedPalette.init();
+            }
+          };
         } else if (e.getWheelRotation() < 0) {
           if(scaleScale < 100000) scaleScale *= 3;
         } else {

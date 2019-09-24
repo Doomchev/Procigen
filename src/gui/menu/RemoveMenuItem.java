@@ -15,7 +15,12 @@ public class RemoveMenuItem extends MenuItem {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    parent.getList().remove(element);
-    Main.updateProject();
+    Main.changesThread = new Thread() {
+      @Override
+      public void run() {
+        parent.getList().remove(element);
+        Main.updateProject();
+      }
+    };
   }
 }

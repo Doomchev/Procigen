@@ -18,11 +18,14 @@ public class RenderMenuItem extends MenuItem {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    Render.stop();
-    Render.renderToImages(width, height, video);
-    Main.imageWidth = (int) Math.ceil(Main.renderWidth / Main.detalization);
-    Main.imageHeight = (int) Math.ceil(Main.renderHeight / Main.detalization);
-    Project.instance.init();
-    Render.start();
+    Main.changesThread = new Thread() {
+      @Override
+      public void run() {
+        Render.renderToImages(width, height, video);
+        Main.imageWidth = (int) Math.ceil(Main.renderWidth / Main.detalization);
+        Main.imageHeight = (int) Math.ceil(Main.renderHeight / Main.detalization);
+        Project.instance.init();
+      }
+    };
   }
 }

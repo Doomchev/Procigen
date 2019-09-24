@@ -1,5 +1,6 @@
 package parameters;
 
+import base.RenderingBitmap;
 import java.io.IOException;
 import structure.Element;
 
@@ -9,9 +10,14 @@ public class DoubleValue extends Element {
   public DoubleValue(double value) {
     this.value = value;
   }
+
+  @Override
+  public boolean isValue() {
+    return true;
+  }
   
   @Override
-  public double getDouble() {
+  public double getDouble(RenderingBitmap bitmap) {
     return value;
   }
   

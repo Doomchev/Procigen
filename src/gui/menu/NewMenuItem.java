@@ -29,15 +29,18 @@ public class NewMenuItem extends MenuItem {
     try {
       Element element = (Element) elementClass.newInstance();
       element.init();
-      Render.stop();
-      LinkedList<Element> list = parent.getList();
-      if(afterElement == null) {
-        list.addFirst(element);
-      } else {
-        list.add(list.indexOf(afterElement) + 1, element);
-      }
-      refresh();
-      Render.start();
+      Main.changesThread = new Thread() {
+        @Override
+        public void run() {
+          LinkedList<Element> list = parent.getList();
+          if(afterElement == null) {
+            list.addFirst(element);
+          } else {
+            list.add(list.indexOf(afterElement) + 1, element);
+          }
+          refresh();
+        }
+      };
     } catch (InstantiationException | IllegalAccessException ex) {
     }
   }

@@ -1,5 +1,6 @@
 package structure.alterations;
 
+import base.RenderingBitmap;
 import parameters.ParameterTemplate;
 import structure.Element;
 
@@ -13,8 +14,8 @@ public class Alteration extends Element {
     templates[SHIFT] = new ParameterTemplate("Shift", 0.0);
   }
   
-  public double getTime() {
-    double k = timeValue + params[SHIFT].getDouble();
+  public double getTime(RenderingBitmap bitmap) {
+    double k = bitmap.time + params[SHIFT].getDouble(bitmap);
     return k - Math.floor(k);
   }
 
